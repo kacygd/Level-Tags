@@ -11,6 +11,7 @@
 	"developer": "KampWski",
 	"description": "Mod adding tags to levels",
 	"tags": ["interface","utility","online"],
+	"repository": "https://github.com/KampWskiR/Level-Tags",
 	"settings": {
 		"levelcellShow": {
 			"name": "LevelCell Tags",
@@ -20,19 +21,19 @@
 		},
 		"infoShow": {
 			"name": "InfoLayer Tags",
-			"description": "Enable Tags displaying in InfoLayer",
+			"description": "Enable tags displaying in InfoLayer",
 			"type": "bool",
 			"default": true
 		},
 		"levelInfoShow": {
 			"name": "LevelInfoLayer Tags",
-			"description": "Enable Tags displaying in LevelInfoLayer",
+			"description": "Enable tags displaying in LevelInfoLayer",
 			"type": "bool",
 			"default": false
 		},
 		"HideNoTags": {
 			"name": "Hide NoTags Message",
-			"description": "The Tags Will Disappear If The Tags At This Level Are Not Available.",
+			"description": "The tags will disappear if they are not available.",
 			"type": "bool",
 			"default": false
 		}
