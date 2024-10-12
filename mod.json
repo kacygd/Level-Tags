@@ -1,0 +1,40 @@
+{
+	"geode": "3.8.1",
+    "gd": {
+        "win": "2.206",
+        "android": "2.206",
+        "mac": "2.206"
+    },
+	"version": "v0.0.6-alpha",
+	"id": "kampwski.level_tags",
+	"name": "Level Tags",
+	"developer": "KampWski",
+	"description": "Mod adding tags to levels",
+	"tags": ["interface","utility","online"],
+	"settings": {
+		"levelcellShow": {
+			"name": "LevelCell Tags",
+			"description": "Enable Tags displaying in LevelCell",
+			"type": "bool",
+			"default": true
+		},
+		"infoShow": {
+			"name": "InfoLayer Tags",
+			"description": "Enable Tags displaying in InfoLayer",
+			"type": "bool",
+			"default": true
+		},
+		"levelInfoShow": {
+			"name": "LevelInfoLayer Tags",
+			"description": "Enable Tags displaying in LevelInfoLayer",
+			"type": "bool",
+			"default": false
+		},
+		"HideNoTags": {
+			"name": "Hide NoTags Message",
+			"description": "The Tags Will Disappear If The Tags At This Level Are Not Available.",
+			"type": "bool",
+			"default": false
+		}
+	}
+}
