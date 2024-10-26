@@ -19,6 +19,10 @@
 #include <string>
 #include <unordered_map>
 #include <map>
+#include <array>
+#include <Geode/ui/ScrollLayer.hpp>
+#include <Geode/ui/LoadingSpinner.hpp>
+#include <Geode/ui/BasedButtonSprite.hpp>
 
 #include "levelCell.hpp"
 #include "infoLayer.hpp"
