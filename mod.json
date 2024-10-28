@@ -1,28 +1,32 @@
 {
 	"geode": "3.8.1",
-    "gd": {
-        "win": "2.206",
-        "android": "2.206",
-        "mac": "2.206"
-    },
-	"version": "v0.0.7-alpha",
+	"gd": {
+		"win": "2.206",
+		"mac": "2.206",
+		"android": "2.206"
+	},
+	"version": "v0.0.7-alpha.2",
 	"id": "kampwski.level_tags",
 	"name": "Level Tags",
 	"developer": "KampWski",
 	"description": "Mod adding tags to levels",
-    "dependencies": [
-        {
-            "id": "geode.node-ids",
-            "version": "v1.10.0",
-            "importance": "required"
-        }
-    ],
-	"tags": ["interface","utility","online"],
+	"dependencies": [
+		{
+			"id": "geode.node-ids",
+			"version": "v1.10.0",
+			"importance": "required"
+		}
+	],
+	"tags": [
+		"interface",
+		"utility",
+		"online"
+	],
 	"repository": "https://github.com/KampWskiR/Level-Tags",
 	"resources": {
 		"sprites": [
-            "resources/*.png"
-        ]
+			"resources/*.png"
+		]
 	},
 	"settings": {
 		"levelcellShow": {
