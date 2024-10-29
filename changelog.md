@@ -1,4 +1,8 @@
-# 0.0.7-alpha
+# v0.0.7-alpha.2
+- Full Cross-platform support
+- Tags are now correctly shown in all aspect ratios (hopefully)
+
+# v0.0.7-alpha
 - Added placeholder for tags requesting
 - Tags now display only when they exist
 
