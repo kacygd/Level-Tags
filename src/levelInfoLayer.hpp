@@ -41,6 +41,7 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
             CircleButtonSprite::createWithSprite("icon.png"_spr, 1.2, CircleBaseColor::DarkPurple), this, menu_selector(ltLevelInfoLayer::request)
         );
         menu->addChild(request);
+        menu->updateLayout();
 
         loadCustomLevelInfoLayer();
         return true;
