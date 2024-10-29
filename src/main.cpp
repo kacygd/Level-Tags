@@ -10,6 +10,7 @@
 #include <Geode/loader/Event.hpp>
 #include <fmt/core.h>
 #include <fmt/format.h>
+#include <algorithm>
 #include <Geode/loader/SettingEvent.hpp>
 #include <Geode/binding/CCMenuItemToggler.hpp>
 #include <vector>

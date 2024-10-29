@@ -29,10 +29,11 @@ class $modify(ltLevelCell, LevelCell) {
         bool levelPlaceExists = m_mainLayer->getChildByID("level-place") != nullptr;
         auto mainMenu = m_mainLayer->getChildByID("main-menu");
 
+        if (auto title = m_mainLayer->getChildByID("level-name")) title->setPositionY(levelPlaceExists ? 42 : 77);
         if (auto copy = m_mainLayer->getChildByID("copy-indicator")) copy->setPositionY(levelPlaceExists ? 40 : 55);
         if (auto highObject = m_mainLayer->getChildByID("high-object-indicator")) highObject->setPositionY(levelPlaceExists ? 40 : 55);
         if (auto ncsIcon = m_mainLayer->getChildByID("ncs-icon")) ncsIcon->setPositionY(levelPlaceExists ? 27.5 : 39.5);
-        if (auto creatorName = mainMenu->getChildByID("creator-name")) creatorName->setPositionY(levelPlaceExists ? -119 : creatorName->getPositionY()+4);
+        if (auto creatorName = mainMenu->getChildByID("creator-name")) creatorName->setPositionY(creatorName->getPositionY() + (levelPlaceExists ? 0 : 4));
         if (auto songName = m_mainLayer->getChildByID("song-name")) songName->setPositionY(levelPlaceExists ? 28 : 40);
         if (levelPlaceExists) {
             for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3"}) {
@@ -74,7 +75,7 @@ class $modify(ltLevelCell, LevelCell) {
 
         auto tagMenu = CCMenu::create();
         tagMenu->setContentSize({210, 12});
-        tagMenu->setPosition({levelPlaceExists ? 15.0f : 50.0f, levelPlaceExists ? 9.5f : 19.5f});
+        tagMenu->setPosition({levelPlaceExists ? 41.0f : 50.0f, levelPlaceExists ? 11.0f : 19.5f});
         tagMenu->setScale(levelPlaceExists ? 0.75 : 1);
         tagMenu->setID("level-tags");
 

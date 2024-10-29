@@ -14,5 +14,3 @@ Mod inspiration: **[GDColon](user:106255)**
 - Better Tags Extending
 - Offline Mode
 - More Customization
-
-**You can request tags for levels using [this form.](https://forms.gle/ox2VzydErPFdQd5S6)**

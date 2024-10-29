@@ -54,20 +54,22 @@ class $modify(ltInfoLayer, InfoLayer) {
     }
 
     CCMenu* createTagContainer() {
+         CCSize winSize = CCDirector::get()->getWinSize();
+
         auto tagMenu = CCMenu::create();
-        tagMenu->setContentSize({210, 12});
-        tagMenu->setPosition({190, 238.5});
+        tagMenu->setPosition({0,0});
+        tagMenu->setScale(0.8);
         tagMenu->setID("level-tags");
 
         auto spr = CCSprite::create("GJ_progressBar_001.png");
         spr->setScale(0.625);
 
-        auto container = CCMenuItemSpriteExtra::create(spr, this, menu_selector(ltInfoLayer::moreTags));
+        auto container = CCMenuItemSpriteExtra::create(spr,this,menu_selector(ltInfoLayer::moreTags));
         container->setColor({0, 0, 0});
-        container->setPosition({105,5});
         container->setAnchorPoint({0.5,0.5});
         container->setID("tags-container");
-        container->setOpacity(128);
+        if (auto desc = m_mainLayer->getChildByID("description-area")) container->setPosition({winSize.width / 2, desc->getPositionY() + 54});
+        container->setOpacity({128});
         tagMenu->addChild(container);
 
         auto containerMenu = CCMenu::create();
@@ -83,14 +85,13 @@ class $modify(ltInfoLayer, InfoLayer) {
     };
 
     void updateTags() {
-        if (auto descArea = m_mainLayer->getChildByID("description-area")) descArea->setPositionY(208);
-        if (auto creatorButton = m_mainLayer->getChildByID("main-menu")->getChildByID("creator-button")) creatorButton->setPositionY(103);
+        if (auto descArea = m_mainLayer->getChildByID("description-area")) descArea->setPositionY(descArea->getPositionY() - 4);
 
         auto tagMenu = createTagContainer();
         m_mainLayer->addChild(tagMenu);
 
         if (auto descBg = m_mainLayer->getChildByID("desc-background")) {
-            descBg->setPositionY(208);
+            descBg->setPositionY(descBg->getPositionY() - 4);
         } else {
             m_mainLayer->removeChild(tagMenu);
             return;

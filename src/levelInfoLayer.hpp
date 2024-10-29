@@ -68,9 +68,11 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
     };
 
     CCMenu* createTagContainer() {
+        CCSize winSize = CCDirector::get()->getWinSize();
+
         auto tagMenu = CCMenu::create();
-        tagMenu->setContentSize({210, 12});
-        tagMenu->setPosition({180, 305});
+        tagMenu->setPosition({0,0});
+        tagMenu->setScale(0.8);
         tagMenu->setID("level-tags");
 
         auto spr = CCSprite::create("GJ_progressBar_001.png");
@@ -78,9 +80,9 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
 
         auto container = CCMenuItemSpriteExtra::create(spr,this,menu_selector(ltLevelInfoLayer::moreTags));
         container->setColor({0, 0, 0});
-        container->setPosition({105,5});
         container->setAnchorPoint({0.5,0.5});
         container->setID("tags-container");
+        container->setPosition({winSize.width / 2, winSize.height * 1.095f});
         container->setOpacity({128});
         tagMenu->addChild(container);
 
@@ -97,7 +99,7 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
     };
 
     void updateTags() {
-        if (auto titleLabel = this->getChildByID("title-label")) titleLabel->setPositionY(295);
+        if (auto titleLabel = this->getChildByID("title-label")) titleLabel->setPositionY(titleLabel->getPositionY() - 4);
 
         auto tagMenu = createTagContainer();
         this->addChild(tagMenu);
