@@ -58,7 +58,8 @@ class $modify(ltLevelCell, LevelCell) {
                     if (!error.empty()) log::error("{}", error);
                     auto tags = json.as<std::vector<std::string>>();
                     m_fields->jsonResponse[m_level->m_levelID.value()] = tags;
-                    updateTags();
+                    updateTags(false);
+                    adjustPositions();
                 }
             }
         });
@@ -70,83 +71,95 @@ class $modify(ltLevelCell, LevelCell) {
         );
     };
 
-    CCMenu* createTagContainer() {
+    CCMenu* createTagContainer(bool extended) {
         bool levelPlaceExists = m_mainLayer->getChildByID("level-place") != nullptr;
 
         auto tagMenu = CCMenu::create();
         tagMenu->setContentSize({210, 12});
-        tagMenu->setPosition({levelPlaceExists ? 41.0f : 50.0f, levelPlaceExists ? 11.0f : 19.5f});
+        tagMenu->setPosition({levelPlaceExists ? 41.0f : 53.0f, levelPlaceExists ? 11.0f : 25.0f});
+        if (extended) {
+            tagMenu->setLayout(RowLayout::create()->setGrowCrossAxis(true)->setAutoScale(false)->setGap(5)->setAxisAlignment(AxisAlignment::Start));
+            tagMenu->setAnchorPoint({0,0.8});
+        } else {
+            tagMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(5)->setAxisAlignment(AxisAlignment::Start));
+            tagMenu->setAnchorPoint({0,0.5});
+        }
         tagMenu->setScale(levelPlaceExists ? 0.75 : 1);
         tagMenu->setID("level-tags");
-
-        auto spr = CCSprite::create("GJ_progressBar_001.png");
-        spr->setScale(0.625);
-
-        auto container = CCMenuItemSpriteExtra::create(spr, this, menu_selector(ltLevelCell::moreTags));
-        container->setColor({0, 0, 0});
-        container->setPosition({105,5});
-        container->setAnchorPoint({0.5,0.5});
-        container->setID("tags-container");
-        container->setOpacity(128);
-        tagMenu->addChild(container);
-
-        auto containerMenu = CCMenu::create();
-        containerMenu->setID("tags");
-        containerMenu->setPosition({0, 2});
-        containerMenu->setAnchorPoint({0, 0});
-        containerMenu->setLayout(AxisLayout::create()->setAutoScale(false));
-        containerMenu->setContentSize({212, 12});
-        containerMenu->updateLayout();
-        container->addChild(containerMenu);
 
         return tagMenu;
     };
 
-    void updateTags() {
-        adjustPositions();
+    void updateTags(bool extended) {
+        if (m_mainLayer->getChildByID("level-tags")) m_mainLayer->removeChildByID("level-tags");
 
-        auto tagMenu = createTagContainer();
+        auto tagMenu = createTagContainer(extended);
         m_mainLayer->addChild(tagMenu);
-
-        auto container = tagMenu->getChildByID("tags-container");
-        auto containerMenu = container->getChildByID("tags");
 
         int currentLevelID = m_level->m_levelID.value();
         if (m_fields->jsonResponse.find(currentLevelID) != m_fields->jsonResponse.end()) {
             auto texts = m_fields->jsonResponse[currentLevelID];
 
-            float xPos = 7;
             for (const auto& tag : texts) {
                 std::string displayText = tag;
 
-                auto tagNode = CCLabelBMFont::create(displayText.c_str(), "bigFont.fnt");
-                tagNode->setAnchorPoint({0.5, 0.5});
+                auto tagNode = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::createWithSpriteFrameName("GJ_noteIcon_001.png"), displayText.c_str(), "bigFont.fnt");
+                tagNode->setAnchorPoint({1, 0.5});
                 tagNode->setScale(0.3);
                 tagNode->setColor(color(tag));
                 tagNode->setOpacity(255);
+                tagMenu->addChild(tagNode);
+                tagMenu->updateLayout();
+                if (!extended) {
+                    if (tagNode->getPositionX() > 150) {
+                        tagNode->setAnchorPoint({0.5, 0.5});
 
-                float tagWidth = tagNode->getContentSize().width * tagNode->getScale();
+                        auto expandSpr = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::createWithSpriteFrameName("PBtn_Arrow_001.png"), "more", "bigFont.fnt");
+                        expandSpr->setScale(0.3);
+                        auto tagExpand = CCMenuItemSpriteExtra::create(
+                            expandSpr,
+                            this,
+                            menu_selector(ltLevelCell::expandTags)
+                        );
+                        tagExpand->setAnchorPoint({0.5, 0.5});
+                        tagExpand->setColor({255,255,255});
+                        tagExpand->setOpacity(255);
+                        tagMenu->addChild(tagExpand);
+                        tagMenu->updateLayout();
 
-                if (xPos + tagWidth > 200) {
-                    float remainingWidth = 200 - xPos;
-
-                    float charWidth = tagNode->getContentSize().width / displayText.length();
-                    int maxChars = static_cast<int>(remainingWidth / (tagNode->getScale() * charWidth));
-
-                    if (maxChars > 3) {
-                        displayText = displayText.substr(0, maxChars - 3) + "...";
-                        tagNode->setString(displayText.c_str());
-                    } else {
-                        displayText = "...";
-                        tagNode->setString(displayText.c_str());
-                    }
-                    containerMenu->addChild(tagNode);
-                    break;
+                        break;
+                    };
                 }
-                containerMenu->addChild(tagNode);
-                xPos += tagWidth;
             }
-            containerMenu->updateLayout();
+            if (extended) {
+                        auto arrow = CCSprite::createWithSpriteFrameName("PBtn_Arrow_001.png");
+                        arrow->setRotation(180);
+                        auto expandSpr = IconButtonSprite::create("tagSquare.png"_spr, arrow, "less", "bigFont.fnt");
+                        expandSpr->setScale(0.3);
+                        auto tagExpand = CCMenuItemSpriteExtra::create(
+                            expandSpr,
+                            this,
+                            menu_selector(ltLevelCell::foldTags)
+                        );
+                        tagExpand->setAnchorPoint({0.5, 0.5});
+                        tagExpand->setColor({255,255,255});
+                        tagExpand->setOpacity(255);
+                        tagMenu->addChild(tagExpand);
+                        tagMenu->updateLayout();
+            };
         }
+    };
+
+    void expandTags(CCObject* sender) {
+        for (const auto& id : {"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}) {
+            if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
+        }
+        updateTags(true);
+    };
+    void foldTags(CCObject* sender) {
+        for (const auto& id : {"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}) {
+            if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(true);
+        }
+        updateTags(false);
     };
 };

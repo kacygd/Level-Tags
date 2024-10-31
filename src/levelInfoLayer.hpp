@@ -72,29 +72,11 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
         CCSize winSize = CCDirector::get()->getWinSize();
 
         auto tagMenu = CCMenu::create();
-        tagMenu->setPosition({0,0});
+        tagMenu->setContentWidth(winSize.width);
+        tagMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(5)->setAxisAlignment(AxisAlignment::Center));
+        tagMenu->setPosition({winSize.width / 2,winSize.height / 1.02f});
         tagMenu->setScale(0.8);
         tagMenu->setID("level-tags");
-
-        auto spr = CCSprite::create("GJ_progressBar_001.png");
-        spr->setScale(0.625);
-
-        auto container = CCMenuItemSpriteExtra::create(spr,this,menu_selector(ltLevelInfoLayer::moreTags));
-        container->setColor({0, 0, 0});
-        container->setAnchorPoint({0.5,0.5});
-        container->setID("tags-container");
-        container->setPosition({winSize.width / 2, winSize.height * 1.095f});
-        container->setOpacity({128});
-        tagMenu->addChild(container);
-
-        auto containerMenu = CCMenu::create();
-        containerMenu->setID("tags");
-        containerMenu->setPosition({0, 2});
-        containerMenu->setAnchorPoint({0, 0});
-        containerMenu->setLayout(AxisLayout::create()->setAutoScale(false));
-        containerMenu->setContentSize({212, 12});
-        containerMenu->updateLayout();
-        container->addChild(containerMenu);
 
         return tagMenu;
     };
@@ -105,40 +87,22 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
         auto tagMenu = createTagContainer();
         this->addChild(tagMenu);
 
-        auto container = tagMenu->getChildByID("tags-container");
-        auto containerMenu = container->getChildByID("tags");
-
         int currentLevelID = m_level->m_levelID.value();
         if (m_fields->jsonResponse.find(currentLevelID) != m_fields->jsonResponse.end()) {
             auto texts = m_fields->jsonResponse[currentLevelID];
             
-            float xPos = 7;
             for (const auto& tag : texts) {
                 std::string displayText = tag;
-                auto tagNode = CCLabelBMFont::create(displayText.c_str(), "bigFont.fnt");
+
+                auto tagNode = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::createWithSpriteFrameName("GJ_noteIcon_001.png"), displayText.c_str(), "bigFont.fnt");
                 tagNode->setAnchorPoint({0.5, 0.5});
                 tagNode->setScale(0.3);
                 tagNode->setColor(color(tag));
                 tagNode->setOpacity(255);
                 float tagWidth = tagNode->getContentSize().width * tagNode->getScale();
-                if (xPos + tagWidth > 200) {
-                    float remainingWidth = 200 - xPos;
-                    float charWidth = tagNode->getContentSize().width / displayText.length();  // Single character width
-                    int maxChars = static_cast<int>(remainingWidth / (tagNode->getScale() * charWidth));
-                    if (maxChars > 3) {
-                        displayText = displayText.substr(0, maxChars - 3) + "...";
-                        tagNode->setString(displayText.c_str());
-                    } else {
-                        displayText = "...";
-                        tagNode->setString(displayText.c_str());
-                    }
-                    containerMenu->addChild(tagNode);
-                    break;
-                }
-                containerMenu->addChild(tagNode);
-                xPos += tagWidth;
+                tagMenu->addChild(tagNode);
             }
-            containerMenu->updateLayout();
+            tagMenu->updateLayout();
         }
     };
 };
