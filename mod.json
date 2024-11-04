@@ -1,11 +1,11 @@
 {
-	"geode": "3.8.1",
+	"geode": "3.9.0",
 	"gd": {
 		"win": "2.206",
 		"mac": "2.206",
 		"android": "2.206"
 	},
-	"version": "v0.0.8-alpha",
+	"version": "v0.1.0-alpha",
 	"id": "kampwski.level_tags",
 	"name": "Level Tags",
 	"developer": "KampWski",
@@ -25,7 +25,8 @@
 	"repository": "https://github.com/KampWskiR/Level-Tags",
 	"resources": {
 		"sprites": [
-			"resources/*.png"
+			"resources/*.png",
+			"resources/tags/*.png"
 		]
 	},
 	"settings": {

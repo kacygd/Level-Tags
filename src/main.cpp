@@ -25,6 +25,8 @@
 #include <Geode/ui/LoadingSpinner.hpp>
 #include <Geode/ui/BasedButtonSprite.hpp>
 
+#include "utils.hpp"
+
 #include "levelCell.hpp"
 #include "infoLayer.hpp"
 #include "levelInfoLayer.hpp"

@@ -6,25 +6,6 @@ class $modify(ltInfoLayer, InfoLayer) {
         std::map<int, std::vector<std::string>> jsonResponse;
     };
 
-    ccColor3B color(const std::string& tag) {
-        std::hash<std::string> hasher;
-        size_t hashValue = hasher(tag);
-        return {
-            static_cast<GLubyte>((hashValue >> 16) & 0xFF),
-            static_cast<GLubyte>((hashValue >> 8) & 0xFF),
-            static_cast<GLubyte>(hashValue & 0xFF)
-        };
-    };
-
-    void moreTags(CCObject* sender) {
-        int currentLevelID = m_level->m_levelID.value();
-        if (m_fields->jsonResponse.find(currentLevelID) != m_fields->jsonResponse.end()) {
-            auto texts = m_fields->jsonResponse[currentLevelID];
-            auto displayText = fmt::format("{}", fmt::join(texts, "  "));
-            FLAlertLayer::create(m_level->m_levelName.c_str(), displayText, "OK")->show();
-        }
-    };
-
     $override
     bool init(GJGameLevel* level, GJUserScore* score, GJLevelList* list) {
         if (!InfoLayer::init(level, score, list)) return false;
@@ -86,13 +67,9 @@ class $modify(ltInfoLayer, InfoLayer) {
             for (const auto& tag : texts) {
                 std::string displayText = tag;
 
-                auto tagNode = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::createWithSpriteFrameName("GJ_noteIcon_001.png"), displayText.c_str(), "bigFont.fnt");
-                tagNode->setAnchorPoint({0.5, 0.5});
-                tagNode->setScale(0.3);
-                tagNode->setColor(color(tag));
-                tagNode->setOpacity(255);
-
+                IconButtonSprite* tagNode = tagUtils::addTag(displayText);
                 tagMenu->addChild(tagNode);
+                tagMenu->updateLayout();
             }
             tagMenu->updateLayout();
         }

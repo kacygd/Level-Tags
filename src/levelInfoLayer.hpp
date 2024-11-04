@@ -8,25 +8,6 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
         std::map<int, std::vector<std::string>> jsonResponse;
     };
 
-    ccColor3B color(const std::string& tag) {
-        std::hash<std::string> hasher;
-        size_t hashValue = hasher(tag);
-        return {
-            static_cast<GLubyte>((hashValue >> 16) & 0xFF),
-            static_cast<GLubyte>((hashValue >> 8) & 0xFF),
-            static_cast<GLubyte>(hashValue & 0xFF)
-        };
-    };
-
-    void moreTags(CCObject* sender) {
-        int currentLevelID = m_level->m_levelID.value();
-        if (m_fields->jsonResponse.find(currentLevelID) != m_fields->jsonResponse.end()) {
-            auto texts = m_fields->jsonResponse[currentLevelID];
-            auto displayText = fmt::format("{}", fmt::join(texts, "  "));
-            FLAlertLayer::create(m_level->m_levelName.c_str(), displayText, "OK")->show();
-        }
-    };
-
     void request(CCObject* sender) {
         requestTag::create(m_level->m_levelID)->show();
     };
@@ -40,6 +21,7 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
         auto request = CCMenuItemSpriteExtra::create(
             CircleButtonSprite::createWithSprite("icon.png"_spr, 1.2, CircleBaseColor::DarkPurple), this, menu_selector(ltLevelInfoLayer::request)
         );
+        request->setID("tag-request");
         menu->addChild(request);
         menu->updateLayout();
 
@@ -73,7 +55,7 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
 
         auto tagMenu = CCMenu::create();
         tagMenu->setContentWidth(winSize.width);
-        tagMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(5)->setAxisAlignment(AxisAlignment::Center));
+        tagMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(3)->setAxisAlignment(AxisAlignment::Center));
         tagMenu->setPosition({winSize.width / 2,winSize.height / 1.02f});
         tagMenu->setScale(0.8);
         tagMenu->setID("level-tags");
@@ -94,13 +76,9 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
             for (const auto& tag : texts) {
                 std::string displayText = tag;
 
-                auto tagNode = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::createWithSpriteFrameName("GJ_noteIcon_001.png"), displayText.c_str(), "bigFont.fnt");
-                tagNode->setAnchorPoint({0.5, 0.5});
-                tagNode->setScale(0.3);
-                tagNode->setColor(color(tag));
-                tagNode->setOpacity(255);
-                float tagWidth = tagNode->getContentSize().width * tagNode->getScale();
+                IconButtonSprite* tagNode = tagUtils::addTag(displayText);
                 tagMenu->addChild(tagNode);
+                tagMenu->updateLayout();
             }
             tagMenu->updateLayout();
         }
