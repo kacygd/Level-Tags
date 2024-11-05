@@ -1,3 +1,6 @@
+# v0.1.0-alpha
+- Mod Redesign
+
 # v0.0.7-alpha.2
 - Full Cross-platform support
 - Tags are now correctly shown in all aspect ratios (hopefully)

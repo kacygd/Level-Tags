@@ -22,11 +22,14 @@ icon = CCSprite::createWithSpriteFrameName("ship");
         return {r,g,b};
     }
     static IconButtonSprite* addTag(std::string tag) {
-        bool spr = true;
         std::transform(tag.begin(), tag.end(), tag.begin(),
                [](unsigned char c){ return std::tolower(c); });
+
         auto tagNode = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::create(fmt::format("{}"_spr, tag + ".png").c_str()), tag.c_str(), "bigFont.fnt");
-        if (tagNode->getIcon()->getScale() == 0.625) tagNode->setIcon(LoadingSpinner::create(40));
+        if (tagNode->getIcon()->getScale() == 0.625) tagNode->setIcon(CCSprite::create("404.png"_spr));
+
+        if (std::unordered_set<std::string>{"generic", "tech", "effect", "design", "layout", "modern", "art", "ambience", "animation", "cartoon", "realism", "core", "minigame", "simplism", "atmospheric", "experimental", "standard", "recreation", "neon"}.count(tag))  tagNode->setIcon(CCSprite::create("style.png"_spr));
+
         tagNode->setAnchorPoint({1, 0.5});
         tagNode->setScale(0.35);
         tagNode->setColor(tagUtils::color(tag));
