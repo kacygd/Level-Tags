@@ -25,26 +25,19 @@ class $modify(ltLevelCell, LevelCell) {
             if (auto icon = m_mainLayer->getChildByID(id)) icon->setPositionY(levelPlaceExists ? 6 : 10);
         }
     };
-    
+
     void loadCustomLevelCell() {
         LevelCell::loadCustomLevelCell();
-        this->setContentHeight(this->getContentHeight() + 50);
         if (!Mod::get()->getSettingValue<bool>("levelcellShow")) return;
 
-        m_fields->m_listener.bind([this](web::WebTask::Event* e) {
-            if (auto res = e->getValue()) {
-                if (res->ok()) {
-                    std::string error;
-                    auto json = matjson::parse(res->string().unwrapOr("[]"));
-                    if (json.is_null()) json = matjson::Array();
-                    if (!error.empty()) log::error("{}", error);
-                    auto tags = json.as<std::vector<std::string>>();
-                    m_fields->jsonResponse[m_level->m_levelID.value()] = tags;
+            m_fields->m_listener.bind([this](web::WebTask::Event* e) {
+                if (auto res = e->getValue(); res && res->ok()) {
+                    auto json = matjson::parse(res->string().unwrapOr("[]")).unwrapOr("[]");
+                    m_fields->jsonResponse[m_level->m_levelID.value()] = json.as<std::vector<std::string>>().unwrap();
                     updateTags(false);
                     adjustPositions();
                 }
-            }
-        });
+            });
 
         auto req = web::WebRequest();
 
@@ -60,15 +53,16 @@ class $modify(ltLevelCell, LevelCell) {
         auto tagMenu = CCMenu::create();
         tagMenu->setContentSize({230, 12});
         tagMenu->setPosition({m_compactView ? 46.0f : 53.0f, m_compactView ? 21.0f : 31.0f});
-        if (list) tagMenu->setPositionX(66);
         tagMenu->setAnchorPoint({0,1});
+        tagMenu->setScale(m_compactView ? 0.75 : 1);
+        tagMenu->setID("level-tags");
+        
+        if (list) tagMenu->setPositionX(66);
         if (extended) {
             tagMenu->setLayout(RowLayout::create()->setGrowCrossAxis(true)->setAutoScale(false)->setGap(3)->setAxisAlignment(AxisAlignment::Start));
         } else {
             tagMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(3)->setAxisAlignment(AxisAlignment::Start));
         }
-        tagMenu->setScale(m_compactView ? 0.75 : 1);
-        tagMenu->setID("level-tags");
 
         return tagMenu;
     };
@@ -84,45 +78,35 @@ class $modify(ltLevelCell, LevelCell) {
             auto tags = m_fields->jsonResponse[currentLevelID];
 
             for (const auto& tag : tags) {
-                std::string displayText = tag;
- 
-                IconButtonSprite* tagNode = tagUtils::addTag(displayText);
+                IconButtonSprite* tagNode = tagUtils::addTag(tag);
                 tagMenu->addChild(tagNode);
                 tagMenu->updateLayout();
 
-                if (!extended) {
-                    if (tagNode->getPositionX() > 150) {
-                        tagNode->setAnchorPoint({0.5, 0.5});
+                if (!extended && tagNode->getPositionX() > 150) {
+                    tagNode->setAnchorPoint({0.5, 0.5});
 
-                        if (tags.size() == tagMenu->getChildrenCount()) break;
+                    if (tags.size() == tagMenu->getChildrenCount()) break;
 
-                        auto expandSpr = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::createWithSpriteFrameName("PBtn_Arrow_001.png"), "more", "bigFont.fnt");
-                        expandSpr->setScale(0.35);
+                    auto expandSpr = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::createWithSpriteFrameName("PBtn_Arrow_001.png"), "more", "bigFont.fnt");
+                    expandSpr->setScale(0.35);
 
-                        auto tagExpand = CCMenuItemSpriteExtra::create(expandSpr, this, menu_selector(ltLevelCell::expandTags));
-                        tagExpand->setAnchorPoint({0.5, 0.5});
-                        tagExpand->setColor({255,255,255});
-                        tagExpand->setOpacity(255);
-                        tagMenu->addChild(tagExpand);
-                        tagMenu->updateLayout();
-
-                        break;
-                    };
+                    auto tagExpand = CCMenuItemSpriteExtra::create(expandSpr, this, menu_selector(ltLevelCell::expandTags));
+                    tagExpand->setAnchorPoint({0.5, 0.5});
+                    tagExpand->setColor({255,255,255});
+                    tagExpand->setOpacity(255);
+                    tagMenu->addChild(tagExpand);
+                    tagMenu->updateLayout();
+                    break;
                 }
-            }
+            };
 
             if (extended) {
                 auto arrow = CCSprite::createWithSpriteFrameName("PBtn_Arrow_001.png");
                 arrow->setRotation(180);
-
                 auto expandSpr = IconButtonSprite::create("tagSquare.png"_spr, arrow, "less", "bigFont.fnt");
                 expandSpr->setScale(0.35);
 
-                auto tagExpand = CCMenuItemSpriteExtra::create(
-                    expandSpr,
-                    this,
-                    menu_selector(ltLevelCell::foldTags)
-                );
+                auto tagExpand = CCMenuItemSpriteExtra::create(expandSpr, this, menu_selector(ltLevelCell::collapseTags));
                 tagExpand->setAnchorPoint({0.5, 0.5});
                 tagExpand->setColor({255,255,255});
                 tagExpand->setOpacity(255);
@@ -130,13 +114,8 @@ class $modify(ltLevelCell, LevelCell) {
                 tagMenu->updateLayout();
             };
 
-            tagMenu->updateLayout();
             if (tagMenu->getContentHeight() > 28) {
-                if (m_compactView) {
-                    tagMenu->setPositionY(35);
-                } else {
-                    tagMenu->setPositionY(45);
-                };
+                tagMenu->setPositionY(m_compactView ? 35 : 45);
                 m_mainLayer->getChildByID("song-name")->setVisible(false);
                 for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3"}) {
                     if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
@@ -147,6 +126,8 @@ class $modify(ltLevelCell, LevelCell) {
                     if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(true);
                 }
             }
+
+            tagMenu->updateLayout();
         }
     };
 
@@ -155,11 +136,12 @@ class $modify(ltLevelCell, LevelCell) {
             if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
         }
         updateTags(true);
-    };
-    void foldTags(CCObject* sender) {
+    }
+
+    void collapseTags(CCObject* sender) {
         for (const auto& id : {"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}) {
             if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(true);
         }
         updateTags(false);
-    };
+    }
 };

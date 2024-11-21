@@ -9,7 +9,6 @@ project(LevelTags VERSION 1.0.0)
 add_library(${PROJECT_NAME} SHARED
     src/main.cpp
     src/levelCell.hpp
-    src/infoLayer.hpp
     src/levelInfoLayer.hpp
 )
 

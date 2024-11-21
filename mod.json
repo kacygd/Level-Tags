@@ -1,11 +1,11 @@
 {
-	"geode": "3.9.0",
+	"geode": "4.0.1",
 	"gd": {
-		"win": "2.206",
-		"mac": "2.206",
-		"android": "2.206"
+		"win": "2.2074",
+		"mac": "2.2074",
+		"android": "2.2074"
 	},
-	"version": "v0.1.0-alpha",
+	"version": "v0.2.0-alpha",
 	"id": "kampwski.level_tags",
 	"name": "Level Tags",
 	"developer": "KampWski",
@@ -13,7 +13,7 @@
 	"dependencies": [
 		{
 			"id": "geode.node-ids",
-			"version": "v1.10.0",
+			"version": "v1.17.0",
 			"importance": "required"
 		}
 	],
@@ -27,18 +27,17 @@
 		"sprites": [
 			"resources/*.png",
 			"resources/tags/*.png"
-		]
+		],
+		"spritesheets": {
+			"tags": [
+				"resources/tags/*.png"
+			]
+		}
 	},
 	"settings": {
 		"levelcellShow": {
 			"name": "LevelCell Tags",
 			"description": "Enable Tags displaying in LevelCell",
-			"type": "bool",
-			"default": true
-		},
-		"infoShow": {
-			"name": "InfoLayer Tags",
-			"description": "Enable tags displaying in InfoLayer",
 			"type": "bool",
 			"default": true
 		},

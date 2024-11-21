@@ -1,6 +1,6 @@
-using namespace geode::prelude;
-
 #include "requestTag.hpp"
+
+using namespace geode::prelude;
 
 class $modify(ltLevelInfoLayer, LevelInfoLayer) {
     struct Fields {
@@ -9,13 +9,12 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
     };
 
     void request(CCObject* sender) {
-        requestTag::create(m_level->m_levelID)->show();
+        requestTag::create({std::to_string(m_level->m_levelID.value()), m_level->isPlatformer()})->show();
     };
 
     $override
     bool init(GJGameLevel* level, bool challenge) {
         if (!LevelInfoLayer::init(level, challenge)) return false;
-
         auto menu = this->getChildByID("left-side-menu");
 
         auto request = CCMenuItemSpriteExtra::create(
@@ -27,22 +26,14 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
 
         loadCustomLevelInfoLayer();
         return true;
-    }
+    };
 
     void loadCustomLevelInfoLayer() {
-        if (!m_level) return;
-
         m_fields->m_listener.bind([this](web::WebTask::Event* e) {
-            if (auto res = e->getValue()) {
-                if (res->ok()) {
-                    std::string error;
-                    auto json = matjson::parse(res->string().unwrapOr("[]"));
-                    if (json.is_null()) json = matjson::Array();
-                    if (!error.empty()) log::error("{}", error);
-                    auto tags = json.as<std::vector<std::string>>();
-                    m_fields->jsonResponse[m_level->m_levelID.value()] = tags;
-                    updateTags();
-                }
+            if (auto res = e->getValue(); res && res->ok()) {
+                auto json = matjson::parse(res->string().unwrapOr("[]")).unwrapOr("[]");
+                m_fields->jsonResponse[m_level->m_levelID.value()] = json.as<std::vector<std::string>>().unwrap();
+                updateTags();
             }
         });
 
@@ -56,8 +47,8 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
         auto tagMenu = CCMenu::create();
         tagMenu->setContentWidth(winSize.width);
         tagMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(3)->setAxisAlignment(AxisAlignment::Center));
-        tagMenu->setPosition({winSize.width / 2,winSize.height / 1.02f});
-        tagMenu->setScale(0.8);
+        tagMenu->setPosition({winSize.width / 2,winSize.height / 1.022f});
+        tagMenu->setScale(0.9);
         tagMenu->setID("level-tags");
 
         return tagMenu;
@@ -71,12 +62,10 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
 
         int currentLevelID = m_level->m_levelID.value();
         if (m_fields->jsonResponse.find(currentLevelID) != m_fields->jsonResponse.end()) {
-            auto texts = m_fields->jsonResponse[currentLevelID];
+            auto tags = m_fields->jsonResponse[currentLevelID];
             
-            for (const auto& tag : texts) {
-                std::string displayText = tag;
-
-                IconButtonSprite* tagNode = tagUtils::addTag(displayText);
+            for (const auto& tag : tags) {
+                IconButtonSprite* tagNode = tagUtils::addTag(tag);
                 tagMenu->addChild(tagNode);
                 tagMenu->updateLayout();
             }

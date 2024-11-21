@@ -6,7 +6,7 @@ A simple mod that adds tags to levels indicating their style, gameplay, and more
 
 # Planned Features
 - Level Tag Browser
-- Better Tag Requesting
+- Tags in local levels
 - More Customization
 
 # Credits

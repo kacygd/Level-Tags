@@ -11,11 +11,9 @@
 #include <fmt/core.h>
 #include <fmt/format.h>
 #include <algorithm>
-#include <Geode/loader/SettingEvent.hpp>
 #include <Geode/binding/CCMenuItemToggler.hpp>
 #include <vector>
 #include <functional>
-#include <Geode/cocos/base_nodes/Layout.hpp>
 #include <matjson.hpp>
 #include <string>
 #include <unordered_map>
@@ -28,7 +26,6 @@
 #include "utils.hpp"
 
 #include "levelCell.hpp"
-#include "infoLayer.hpp"
 #include "levelInfoLayer.hpp"
 
 // I'll add tag search soon here
