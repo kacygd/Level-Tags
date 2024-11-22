@@ -257,14 +257,15 @@ protected:
         );
 
         if (std::get<bool>(m_level[1])) {
+            menuGameplay->setScale(0.9);
             addTagsList(
                 5,
-                {"bossfight","memory","spam","duals","maze","fast paced","slow paced","sync","gimmicky","needle","timed","puzzle","blinds","momentum","wall jump","cycle","slope boost","random"}
+                {"bossfight","memory","spam","duals","maze","fast paced","slow paced","sync","gimmicky","needle","timed","puzzle","blinds","momentum","wall jump","cycle","slope boost","wind","ice","zippers","wavedash","force blocks","blinkers","avoidance","foddian","autoscroller","rooms","double jump","speedrun","gravity","classic","metroidvania","random"}
             );
         } else {
             addTagsList(
                 5,
-               {"bossfight","flow","fast paced","slow paced","sync","blinds","memory","duals","timings","random"}
+               {"bossfight","flow","fast paced","slow paced","sync","blinds","memory","duals","timing","random","cps","nerve control","learny","straight fly","asym duals"}
             );
         }
 
