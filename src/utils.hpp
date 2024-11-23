@@ -22,7 +22,7 @@ public:
         std::transform(tag.begin(), tag.end(), tag.begin(), [](unsigned char c){ return std::tolower(c); });
                
         auto tagNode = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::createWithSpriteFrameName(fmt::format("{}"_spr, tag + ".png").c_str()), tag.c_str(), "bigFont.fnt");
-        if (tagNode->getIcon()->getScale() == 0.625) tagNode->setIcon(CCSprite::create("404.png"_spr));
+        if (!tagNode->getIcon() || tagNode->getIcon()->getScale() == 0.625) tagNode->setIcon(CCSprite::create("404.png"_spr));
 
         if (std::unordered_set<std::string>{
             "generic", "tech", "effect", "design", "layout", "modern", "art", "ambience", "animation", "cartoon",
