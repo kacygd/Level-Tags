@@ -1,3 +1,6 @@
+# v0.2.1-alpha
+- crash fixed
+
 # v0.2.0-alpha
 - Support for geode v4.0.0 and gd 2.207
 - Revamped tags request
