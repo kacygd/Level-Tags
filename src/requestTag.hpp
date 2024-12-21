@@ -40,6 +40,7 @@ protected:
     std::vector<std::string> tags;
     EventListener<web::WebTask> m_listener;
     std::vector<std::variant<std::string, bool>> m_level;
+    int tagZ = 0;
 
     void createTagMenus() {
         menuCustom = CCMenu::create();
@@ -121,8 +122,10 @@ protected:
             spr->setScale(0.5);
             auto btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(requestTag::btn));
             btn->setID(tags[i]);
+            btn->setZOrder(tagZ);
             btn->setTag(tag);
             menus[tag]->addChild(btn);
+            tagZ++;
         }
         m_mainLayer->addChild(menus[tag]);
         menus[tag]->updateLayout();
@@ -179,6 +182,16 @@ protected:
         m_mainLayer->addChild(bgMenu);
 
         createTagMenus();
+
+        auto discordMenu = CCMenu::create();
+        discordMenu->setContentSize({0,0});
+        discordMenu->setPosition({-20,15});
+        m_mainLayer->addChild(discordMenu);
+
+        auto discord = CCMenuItemSpriteExtra::create(
+            CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png"), this, menu_selector(requestTag::discord)
+        );
+        discordMenu->addChild(discord);
 
         limit = CCLabelBMFont::create("0/10", "chatFont.fnt");
         limit->setPosition({333,215});
@@ -241,36 +254,33 @@ protected:
 
         addCustomMenu();
 
-        addTagsList(
-            2,
-            {"generic","glow","tech","robtop","design","effect","layout","modern","art","ambience","animation","cartoon","pixel","realism","core","minigame","simplism","atmospheric","experimental","standard","circles","recreation","sunset"}
-        );
+        auto loadingTags = LoadingSpinner::create(30);
+        loadingTags->setPosition({m_mainLayer->getContentWidth() / 2, 95});
+        m_mainLayer->addChild(loadingTags);
 
-        addTagsList(
-            3,
-            {"hell","rainbow","retro","space","apocalyptic","futuristic","pixel art","monochromatic","neon","aquatic","nature","cold","hot","desert","magic","beach","1.0","1.9"}
-        );
-
-        addTagsList(
-            4,
-            {"challenge","impossible","nong","checkpointless","2p","v2","lv1","story","flashy","fixed hitboxes","joke","cube","ship","jetpack","ball","ufo","wave","robot","spider","swing"}
-        );
-
-        if (std::get<bool>(m_level[1])) {
-            menuGameplay->setScale(0.9);
-            addTagsList(
-                5,
-                {"bossfight","memory","spam","duals","maze","fast paced","slow paced","sync","gimmicky","needle","timed","puzzle","blinds","momentum","wall jump","cycle","slope boost","wind","ice","zippers","wavedash","force blocks","blinkers","avoidance","foddian","autoscroller","rooms","double jump","speedrun","gravity","classic","metroidvania","random"}
-            );
-        } else {
-            addTagsList(
-                5,
-               {"bossfight","flow","fast paced","slow paced","sync","blinds","memory","duals","timing","random","cps","nerve control","learny","straight fly","asym duals"}
-            );
-        }
+            m_listener.bind([this, loadingTags](web::WebTask::Event* e) {
+                if (auto res = e->getValue(); res && res->ok()) {
+                    m_mainLayer->removeChild(loadingTags);
+                    auto jsonStr = res->string().unwrapOr("{}");
+                    auto json = matjson::parse(jsonStr).unwrapOr("{}");
+                    addTagsList(2,json["style"].as<std::vector<std::string>>().unwrap());
+                    addTagsList(3,json["theme"].as<std::vector<std::string>>().unwrap());
+                    if (std::get<bool>(m_level[1])) { menuGameplay->setScale(0.9);
+                        addTagsList(4,json["plat-meta"].as<std::vector<std::string>>().unwrap());
+                        addTagsList(5,json["plat-gp"].as<std::vector<std::string>>().unwrap());
+                    } else {
+                        addTagsList(4,json["classic-meta"].as<std::vector<std::string>>().unwrap());
+                        addTagsList(5,json["classic-gp"].as<std::vector<std::string>>().unwrap());
+                    }
+                }
+            });
+        auto req = web::WebRequest();
+        m_listener.setFilter(req.get("https://raw.githubusercontent.com/KampWskiR/test3/main/tags.json"));
 
         return true;
     };
+
+    void discord(CCObject* sender) {web::openLinkInBrowser("https://discord.gg/6GXYHf9WTB");};
 
     void category(CCObject* sender) {
         CCMenuItemSpriteExtra* category = static_cast<CCMenuItemSpriteExtra*>(sender);
@@ -347,6 +357,8 @@ protected:
 
     void btn(CCObject* sender) {
         CCMenuItemSpriteExtra* clickedButton = static_cast<CCMenuItemSpriteExtra*>(sender);
+
+        m_mainLayer->getChildByID("menu")->sortAllChildren();
 
         if (tags.size() <= 5) m_mainLayer->getChildByID("menu")->setLayout(AxisLayout::create()->setGap(5)->setDefaultScaleLimits(0.3f,1.f));
         if (tags.size() > 5) m_mainLayer->getChildByID("menu")->setLayout(AxisLayout::create()->setGap(2)->setDefaultScaleLimits(0.3f,0.6f)->setGrowCrossAxis(true));

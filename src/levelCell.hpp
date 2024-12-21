@@ -67,6 +67,15 @@ class $modify(ltLevelCell, LevelCell) {
         return tagMenu;
     };
 
+    void tagDesc(CCObject* sender) {
+        CCMenuItemSpriteExtra* clickedButton = static_cast<CCMenuItemSpriteExtra*>(sender);
+        FLAlertLayer::create(
+            clickedButton->getID().c_str(),
+            tagUtils::getTagDesc(clickedButton->getID().c_str()),
+            "OK"
+        )->show();
+    }
+    
     void updateTags(bool extended) {
         if (m_mainLayer->getChildByID("level-tags")) m_mainLayer->removeChildByID("level-tags");
 
@@ -78,7 +87,11 @@ class $modify(ltLevelCell, LevelCell) {
             auto tags = m_fields->jsonResponse[currentLevelID];
 
             for (const auto& tag : tags) {
-                IconButtonSprite* tagNode = tagUtils::addTag(tag);
+                auto spr = tagUtils::addTag(tag);
+                spr->setScale(0.35);
+                auto tagNode = CCMenuItemSpriteExtra::create(spr, this, menu_selector(ltLevelCell::tagDesc));
+
+                tagNode->setID(tag);
                 tagMenu->addChild(tagNode);
                 tagMenu->updateLayout();
 

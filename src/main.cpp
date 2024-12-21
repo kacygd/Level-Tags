@@ -27,5 +27,3 @@
 
 #include "levelCell.hpp"
 #include "levelInfoLayer.hpp"
-
-// I'll add tag search soon here

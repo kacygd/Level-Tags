@@ -10,19 +10,25 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
 
     void request(CCObject* sender) {
         requestTag::create({std::to_string(m_level->m_levelID.value()), m_level->isPlatformer()})->show();
+        //CCDirector::sharedDirector()->pushScene(levelTags::scene(m_level->m_levelID.value()));
     };
 
-    $override
-    bool init(GJGameLevel* level, bool challenge) {
-        if (!LevelInfoLayer::init(level, challenge)) return false;
-        auto menu = this->getChildByID("left-side-menu");
-
+    CCMenuItemSpriteExtra* requestBtn() {
         auto request = CCMenuItemSpriteExtra::create(
             CircleButtonSprite::createWithSprite("icon.png"_spr, 1.2, CircleBaseColor::DarkPurple), this, menu_selector(ltLevelInfoLayer::request)
         );
         request->setID("tag-request");
-        menu->addChild(request);
-        menu->updateLayout();
+        return request;
+    }
+
+    $override
+    bool init(GJGameLevel* level, bool challenge) {
+        if (!LevelInfoLayer::init(level, challenge)) return false;
+
+                        auto menu = this->getChildByID("left-side-menu");
+                auto request = requestBtn();
+                menu->addChild(request);
+                menu->updateLayout();
 
         loadCustomLevelInfoLayer();
         return true;

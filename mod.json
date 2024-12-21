@@ -1,11 +1,11 @@
 {
-	"geode": "4.0.1",
+	"geode": "4.1.0",
 	"gd": {
 		"win": "2.2074",
 		"mac": "2.2074",
 		"android": "2.2074"
 	},
-	"version": "v0.2.1-alpha",
+	"version": "v0.2.2-alpha",
 	"id": "kampwski.level_tags",
 	"name": "Level Tags",
 	"developer": "KampWski",
@@ -33,6 +33,9 @@
 				"resources/tags/*.png"
 			]
 		}
+	},
+	"links": {
+		"community": "https://discord.gg/6GXYHf9WTB"
 	},
 	"settings": {
 		"levelcellShow": {

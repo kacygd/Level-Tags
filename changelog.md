@@ -1,3 +1,7 @@
+# v0.2.2-alpha
+- Added descriptions to tags
+- Requested tags list is now server-sided
+
 # v0.2.1-alpha
 - crash fixed
 
