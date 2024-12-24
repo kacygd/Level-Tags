@@ -51,6 +51,7 @@ protected:
         menuCustom->setID("menu-custom");
         menuCustom->setLayout(AxisLayout::create()->setAutoScale(false)->setGrowCrossAxis(true)->setGap(2));
         menuCustom->updateLayout();
+        m_mainLayer->addChild(menuCustom);
 
         menuStyle = CCMenu::create();
         menuStyle->setContentSize({340,100});
@@ -59,6 +60,7 @@ protected:
         menuStyle->setID("menu-style");
         menuStyle->setLayout(AxisLayout::create()->setAutoScale(false)->setGrowCrossAxis(true)->setGap(2));
         menuStyle->updateLayout();
+        m_mainLayer->addChild(menuStyle);
 
         menuTheme = CCMenu::create();
         menuTheme->setContentSize({340,100});
@@ -68,6 +70,7 @@ protected:
         menuTheme->setID("menu-meta");
         menuTheme->setLayout(AxisLayout::create()->setAutoScale(false)->setGrowCrossAxis(true)->setGap(2));
         menuTheme->updateLayout();
+        m_mainLayer->addChild(menuTheme);
 
         menuMeta = CCMenu::create();
         menuMeta->setContentSize({340,100});
@@ -77,6 +80,7 @@ protected:
         menuMeta->setID("menu-meta");
         menuMeta->setLayout(AxisLayout::create()->setAutoScale(false)->setGrowCrossAxis(true)->setGap(2));
         menuMeta->updateLayout();
+        m_mainLayer->addChild(menuMeta);
 
         menuGameplay = CCMenu::create();
         menuGameplay->setContentSize({340,100});
@@ -86,6 +90,7 @@ protected:
         menuGameplay->setID("menu-gameplay");
         menuGameplay->setLayout(AxisLayout::create()->setAutoScale(false)->setGrowCrossAxis(true)->setGap(2));
         menuGameplay->updateLayout();
+        m_mainLayer->addChild(menuGameplay);
     }
 
     void addCustomMenu() {
@@ -104,9 +109,7 @@ protected:
         customInput->setMaxCharCount(20);
         menuCustom->addChild(customInput);
         
-        auto add = CCMenuItemSpriteExtra::create(
-            ButtonSprite::create("Add"), this, menu_selector(requestTag::customAdd) 
-        );
+        auto add = CCMenuItemSpriteExtra::create(ButtonSprite::create("Add"), this, menu_selector(requestTag::customAdd));
         add->setPosition({menuCustom->getContentWidth() / 2,20});
         add->setTag(1);
         menuCustom->addChild(add);
@@ -181,17 +184,11 @@ protected:
         bgMenu->setColor({107, 59, 25});
         m_mainLayer->addChild(bgMenu);
 
-        createTagMenus();
-
         auto discordMenu = CCMenu::create();
         discordMenu->setContentSize({0,0});
         discordMenu->setPosition({-20,15});
         m_mainLayer->addChild(discordMenu);
-
-        auto discord = CCMenuItemSpriteExtra::create(
-            CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png"), this, menu_selector(requestTag::discord)
-        );
-        discordMenu->addChild(discord);
+        discordMenu->addChild(CCMenuItemSpriteExtra::create(CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png"), this, menu_selector(requestTag::discord)));
 
         limit = CCLabelBMFont::create("0/10", "chatFont.fnt");
         limit->setPosition({333,215});
@@ -215,65 +212,54 @@ protected:
 
         auto submitSpr = ButtonSprite::create("Submit");
         submitSpr->setScale(0.85);
-        auto submit = CCMenuItemSpriteExtra::create(
-            submitSpr, this, menu_selector(requestTag::submitTags) 
-        );
+        auto submit = CCMenuItemSpriteExtra::create(submitSpr, this, menu_selector(requestTag::submitTags) );
         submit->setPosition({submitMenu->getContentWidth() / 2,submitMenu->getContentHeight() / 2});
         submitMenu->addChild(submit);
 
-        auto categoryCustom = CCMenuItemSpriteExtra::create(
-            ButtonSprite::create("Custom"), this, menu_selector(requestTag::category) 
-        );
+        auto categoryCustom = CCMenuItemSpriteExtra::create(ButtonSprite::create("Custom"), this, menu_selector(requestTag::category));
         categoryCustom->setTag(1);
         categoryMenu->addChild(categoryCustom);
 
-        auto categoryStyle = CCMenuItemSpriteExtra::create(
-            ButtonSprite::create("Style"), this, menu_selector(requestTag::category) 
-        );
+        auto categoryStyle = CCMenuItemSpriteExtra::create(ButtonSprite::create("Style"), this, menu_selector(requestTag::category));
         categoryStyle->setTag(2);
         categoryMenu->addChild(categoryStyle);
 
-        auto categoryTheme = CCMenuItemSpriteExtra::create(
-            ButtonSprite::create("Theme"), this, menu_selector(requestTag::category) 
-        );
+        auto categoryTheme = CCMenuItemSpriteExtra::create(ButtonSprite::create("Theme"), this, menu_selector(requestTag::category));
         categoryTheme->setTag(3);
         categoryMenu->addChild(categoryTheme);
 
-        auto categoryMeta = CCMenuItemSpriteExtra::create(
-            ButtonSprite::create("Meta"), this, menu_selector(requestTag::category) 
-        );
+        auto categoryMeta = CCMenuItemSpriteExtra::create(ButtonSprite::create("Meta"), this, menu_selector(requestTag::category));
         categoryMeta->setTag(4);
         categoryMenu->addChild(categoryMeta);
 
-        auto categoryGameplay = CCMenuItemSpriteExtra::create(
-            ButtonSprite::create("Gameplay"), this, menu_selector(requestTag::category) 
-        );
+        auto categoryGameplay = CCMenuItemSpriteExtra::create(ButtonSprite::create("Gameplay"), this, menu_selector(requestTag::category));
         categoryGameplay->setTag(5);
         categoryMenu->addChild(categoryGameplay);
         categoryMenu->updateLayout();
 
+        createTagMenus();
         addCustomMenu();
 
         auto loadingTags = LoadingSpinner::create(30);
         loadingTags->setPosition({m_mainLayer->getContentWidth() / 2, 95});
         m_mainLayer->addChild(loadingTags);
 
-            m_listener.bind([this, loadingTags](web::WebTask::Event* e) {
-                if (auto res = e->getValue(); res && res->ok()) {
-                    m_mainLayer->removeChild(loadingTags);
-                    auto jsonStr = res->string().unwrapOr("{}");
-                    auto json = matjson::parse(jsonStr).unwrapOr("{}");
-                    addTagsList(2,json["style"].as<std::vector<std::string>>().unwrap());
-                    addTagsList(3,json["theme"].as<std::vector<std::string>>().unwrap());
-                    if (std::get<bool>(m_level[1])) { menuGameplay->setScale(0.9);
-                        addTagsList(4,json["plat-meta"].as<std::vector<std::string>>().unwrap());
-                        addTagsList(5,json["plat-gp"].as<std::vector<std::string>>().unwrap());
-                    } else {
-                        addTagsList(4,json["classic-meta"].as<std::vector<std::string>>().unwrap());
-                        addTagsList(5,json["classic-gp"].as<std::vector<std::string>>().unwrap());
-                    }
+        m_listener.bind([this, loadingTags](web::WebTask::Event* e) {
+            if (auto res = e->getValue(); res && res->ok()) {
+                m_mainLayer->removeChild(loadingTags);
+                auto jsonStr = res->string().unwrapOr("{}");
+                auto json = matjson::parse(jsonStr).unwrapOr("{}");
+                addTagsList(2,json["style"].as<std::vector<std::string>>().unwrap());
+                addTagsList(3,json["theme"].as<std::vector<std::string>>().unwrap());
+                if (std::get<bool>(m_level[1])) { menuGameplay->setScale(0.9);
+                    addTagsList(4,json["plat-meta"].as<std::vector<std::string>>().unwrap());
+                    addTagsList(5,json["plat-gp"].as<std::vector<std::string>>().unwrap());
+                } else {
+                    addTagsList(4,json["classic-meta"].as<std::vector<std::string>>().unwrap());
+                    addTagsList(5,json["classic-gp"].as<std::vector<std::string>>().unwrap());
                 }
-            });
+            }
+        });
         auto req = web::WebRequest();
         m_listener.setFilter(req.get("https://raw.githubusercontent.com/KampWskiR/test3/main/tags.json"));
 
@@ -284,7 +270,7 @@ protected:
 
     void category(CCObject* sender) {
         CCMenuItemSpriteExtra* category = static_cast<CCMenuItemSpriteExtra*>(sender);
-        
+
         switch (category->getTag()) {
             case 1:
                 menuCustom->setVisible(true);
@@ -327,10 +313,8 @@ protected:
     void customAdd(CCObject* sender) {
         if (tags.size() >= 10) return;
         if (customInput->getString().size() < 2) return;
-
         std::string tagString = customInput->getString();
-        if (tagString.size() > 20)  tagString = tagString.substr(0, 20) + "...";
-
+        if (std::string tagString = customInput->getString(); tagString.size() > 20)  tagString = tagString.substr(0, 20) + "...";
         if (std::find(tags.begin(), tags.end(), tagString) != tags.end()) return;
 
         tags.push_back(tagString);
@@ -364,7 +348,6 @@ protected:
         if (tags.size() > 5) m_mainLayer->getChildByID("menu")->setLayout(AxisLayout::create()->setGap(2)->setDefaultScaleLimits(0.3f,0.6f)->setGrowCrossAxis(true));
 
         if (clickedButton->getParent()->getID() == "menu") {
-
             tags.erase(std::remove(tags.begin(), tags.end(), clickedButton->getID()), tags.end());
             clickedButton->getParent()->removeChild(clickedButton);
             clickedButton->m_baseScale = 1;
@@ -387,7 +370,6 @@ protected:
             menuTheme->updateLayout();
             menuMeta->updateLayout();
             menuGameplay->updateLayout();
-
         } else {
             if (tags.size() >= 10) return;
             tags.push_back(clickedButton->getID());
@@ -403,7 +385,6 @@ protected:
 
         limit->setString(fmt::format("{}/10",tags.size()).c_str());
         limit->setColor({static_cast<GLubyte>(std::clamp<int>((tags.size() / 10.0) * 255, 0, 255)), 0, 0});
-
     };
 
     void submitTags(CCObject* sender) {
@@ -419,16 +400,15 @@ protected:
         tagsRequest.pop_back();
         m_listener.bind([this](web::WebTask::Event* e) {
             if (auto res = e->getValue()) {
-                    this->onClose(this);
-                    submit::create(res->ok() || res->code() == 405)->show();
+                this->onClose(this);
+                submit::create(res->ok() || res->code() == 405)->show();
             }
         });
 
         auto req = web::WebRequest();
         req.bodyString(fmt::format("id={}&tags={}", std::get<std::string>(m_level[0]), tagsRequest));
-        m_listener.setFilter(
-            req.post(fmt::format("https://script.google.com/macros/s/AKfycbyDbwwXM6vDzR9832XUHbqJ1quZR6O87aAxrMjHdf0THPg3SCp6faVVKy_EANQ1_TmG/exec"))
-        );
+        m_listener.setFilter(req.post(fmt::format("https://script.google.com/macros/s/AKfycbyDbwwXM6vDzR9832XUHbqJ1quZR6O87aAxrMjHdf0THPg3SCp6faVVKy_EANQ1_TmG/exec")));
+
         m_mainLayer->getChildByID("submit-menu")->removeChild(submitBtn);
         auto loading = LoadingSpinner::create(20);
         loading->setPosition(m_mainLayer->getChildByID("submit-menu")->getContentWidth() / 2, m_mainLayer->getChildByID("submit-menu")->getContentHeight() / 2);

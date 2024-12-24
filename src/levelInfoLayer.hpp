@@ -24,11 +24,11 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
     $override
     bool init(GJGameLevel* level, bool challenge) {
         if (!LevelInfoLayer::init(level, challenge)) return false;
-
-                        auto menu = this->getChildByID("left-side-menu");
-                auto request = requestBtn();
-                menu->addChild(request);
-                menu->updateLayout();
+        
+        auto menu = this->getChildByID("left-side-menu");
+        auto request = requestBtn();
+        menu->addChild(request);
+        menu->updateLayout();
 
         loadCustomLevelInfoLayer();
         return true;

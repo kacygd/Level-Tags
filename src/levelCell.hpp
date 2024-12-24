@@ -74,7 +74,7 @@ class $modify(ltLevelCell, LevelCell) {
             tagUtils::getTagDesc(clickedButton->getID().c_str()),
             "OK"
         )->show();
-    }
+    };
     
     void updateTags(bool extended) {
         if (m_mainLayer->getChildByID("level-tags")) m_mainLayer->removeChildByID("level-tags");
@@ -149,12 +149,12 @@ class $modify(ltLevelCell, LevelCell) {
             if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
         }
         updateTags(true);
-    }
+    };
 
     void collapseTags(CCObject* sender) {
         for (const auto& id : {"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}) {
             if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(true);
         }
         updateTags(false);
-    }
+    };
 };
