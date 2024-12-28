@@ -1,25 +1,24 @@
 class submit : public geode::Popup<bool> {
 protected:
     bool setup(bool success) {
-        m_bgSprite->setContentSize({200,100});
-        m_closeBtn->setPosition({20,130});
-
         auto successIcon = CCSprite::createWithSpriteFrameName(success ? "GJ_completesIcon_001.png" : "GJ_deleteIcon_001.png");
         successIcon->setScale(1.5);
-        successIcon->setPosition({m_mainLayer->getContentWidth() / 2, m_mainLayer->getContentHeight() / 1.8f});
+        successIcon->setPosition({m_mainLayer->getContentWidth() / 2, 60});
         m_mainLayer->addChild(successIcon);
 
         auto successLabel = CCLabelBMFont::create(success ? "Tags Request submitted!" : "Tags Request failed", "chatFont.fnt");
         successLabel->setScale(0.75);
-        successLabel->setPosition({m_mainLayer->getContentWidth() / 2, m_mainLayer->getContentHeight() / 2.9f});
+        successLabel->setPosition({m_mainLayer->getContentWidth() / 2, 30});
         m_mainLayer->addChild(successLabel);
+
+        m_mainLayer->updateLayout();
 
         return true;
     }
 public:
     static submit* create(bool success) {
         auto ret = new submit();
-        if (ret->initAnchored(240.f, 160.f, success, "GJ_square02.png")) {
+        if (ret->initAnchored(180.f, 100.f, success, "GJ_square02.png")) {
             ret->autorelease();
             return ret;
         }
@@ -42,55 +41,38 @@ protected:
     std::vector<std::variant<std::string, bool>> m_level;
     int tagZ = 0;
 
-    void createTagMenus() {
-        menuCustom = CCMenu::create();
-        menuCustom->setContentSize({340,100});
-        menuCustom->setVisible(false);
-        menuCustom->setAnchorPoint({0.5,1});
-        menuCustom->setPosition({m_mainLayer->getContentWidth() / 2,150});
-        menuCustom->setID("menu-custom");
-        menuCustom->setLayout(AxisLayout::create()->setAutoScale(false)->setGrowCrossAxis(true)->setGap(2));
-        menuCustom->updateLayout();
-        m_mainLayer->addChild(menuCustom);
+    CCMenu* createMenu(std::string name) {
+        CCMenu* menu = CCMenu::create();
+        menu->setContentSize({340,100});
+        menu->setAnchorPoint({0.5,1});
+        menu->setPosition({m_mainLayer->getContentWidth() / 2,150});
+        menu->setVisible(false);
+        menu->setID(fmt::format("menu-{}", name));
+        menu->setLayout(AxisLayout::create()->setAutoScale(false)->setGrowCrossAxis(true)->setGap(2));
+        menu->updateLayout();
 
-        menuStyle = CCMenu::create();
-        menuStyle->setContentSize({340,100});
-        menuStyle->setAnchorPoint({0.5,1});
-        menuStyle->setPosition({m_mainLayer->getContentWidth() / 2,150});
-        menuStyle->setID("menu-style");
-        menuStyle->setLayout(AxisLayout::create()->setAutoScale(false)->setGrowCrossAxis(true)->setGap(2));
-        menuStyle->updateLayout();
-        m_mainLayer->addChild(menuStyle);
+        return menu;
+    }
 
-        menuTheme = CCMenu::create();
-        menuTheme->setContentSize({340,100});
-        menuTheme->setAnchorPoint({0.5,1});
-        menuTheme->setVisible(false);
-        menuTheme->setPosition({m_mainLayer->getContentWidth() / 2,150});
-        menuTheme->setID("menu-meta");
-        menuTheme->setLayout(AxisLayout::create()->setAutoScale(false)->setGrowCrossAxis(true)->setGap(2));
-        menuTheme->updateLayout();
-        m_mainLayer->addChild(menuTheme);
+    void createCorners() {
+        auto c1 = CCSprite::createWithSpriteFrameName("dailyLevelCorner_001.png");
+        c1->setPosition({24.6f,24.6f});
+        m_mainLayer->addChild(c1);
 
-        menuMeta = CCMenu::create();
-        menuMeta->setContentSize({340,100});
-        menuMeta->setAnchorPoint({0.5,1});
-        menuMeta->setVisible(false);
-        menuMeta->setPosition({m_mainLayer->getContentWidth() / 2,150});
-        menuMeta->setID("menu-meta");
-        menuMeta->setLayout(AxisLayout::create()->setAutoScale(false)->setGrowCrossAxis(true)->setGap(2));
-        menuMeta->updateLayout();
-        m_mainLayer->addChild(menuMeta);
+        auto c2 = CCSprite::createWithSpriteFrameName("dailyLevelCorner_001.png");
+        c2->setRotation(90);
+        c2->setPosition({24.6f,225.4f});
+        m_mainLayer->addChild(c2);
 
-        menuGameplay = CCMenu::create();
-        menuGameplay->setContentSize({340,100});
-        menuGameplay->setAnchorPoint({0.5,1});
-        menuGameplay->setPosition({m_mainLayer->getContentWidth() / 2,150});
-        menuGameplay->setVisible(false);
-        menuGameplay->setID("menu-gameplay");
-        menuGameplay->setLayout(AxisLayout::create()->setAutoScale(false)->setGrowCrossAxis(true)->setGap(2));
-        menuGameplay->updateLayout();
-        m_mainLayer->addChild(menuGameplay);
+        auto c3 = CCSprite::createWithSpriteFrameName("dailyLevelCorner_001.png");
+        c3->setRotation(180);
+        c3->setPosition({375.f,225.4f});
+        m_mainLayer->addChild(c3);
+
+        auto c4 = CCSprite::createWithSpriteFrameName("dailyLevelCorner_001.png");
+        c4->setRotation(270);
+        c4->setPosition({375.f,24.6f});
+        m_mainLayer->addChild(c4);
     }
 
     void addCustomMenu() {
@@ -117,52 +99,30 @@ protected:
     };
 
     void addTagsList(int tag, std::vector<std::string> tags) {
-        CCMenu* menus[] = { nullptr, nullptr, menuStyle, menuTheme, menuMeta, menuGameplay };
-        if (tag < 2 || tag > 5) return;
+        CCMenu* menus[] = { menuStyle, menuTheme, menuMeta, menuGameplay };
+        if (tag < 0 || tag > 5) return;
 
         for (int i = 0; i < tags.size(); i++) {
-            auto spr = tagUtils::addTag(tags[i].c_str());
-            spr->setScale(0.5);
+            auto spr = tagUtils::addTag(tags[i].c_str(), 0.5);
             auto btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(requestTag::btn));
             btn->setID(tags[i]);
             btn->setZOrder(tagZ);
             btn->setTag(tag);
-            menus[tag]->addChild(btn);
+            menus[tag-2]->addChild(btn);
             tagZ++;
         }
-        m_mainLayer->addChild(menus[tag]);
-        menus[tag]->updateLayout();
+        m_mainLayer->addChild(menus[tag-2]);
+        menus[tag-2]->updateLayout();
     };
 
     bool setup(std::vector<std::variant<std::string, bool>> level) {
-        m_level = level;
         auto winSize = CCDirector::sharedDirector()->getWinSize();
-
-        m_mainLayer->setContentSize({400,250});
-        m_mainLayer->updateLayout();
-        m_closeBtn->setPosition({2,248});
+        m_level = level;
 
         this->setTitle("Request Tags");
-        m_title->setScale(1.25);
+        m_title->setScale(1);
 
-        auto c1 = CCSprite::createWithSpriteFrameName("dailyLevelCorner_001.png");
-        c1->setPosition({24.6f,24.6f});
-        m_mainLayer->addChild(c1);
-
-        auto c2 = CCSprite::createWithSpriteFrameName("dailyLevelCorner_001.png");
-        c2->setRotation(90);
-        c2->setPosition({24.6f,225.4f});
-        m_mainLayer->addChild(c2);
-
-        auto c3 = CCSprite::createWithSpriteFrameName("dailyLevelCorner_001.png");
-        c3->setRotation(180);
-        c3->setPosition({375.f,225.4f});
-        m_mainLayer->addChild(c3);
-
-        auto c4 = CCSprite::createWithSpriteFrameName("dailyLevelCorner_001.png");
-        c4->setRotation(270);
-        c4->setPosition({375.f,24.6f});
-        m_mainLayer->addChild(c4);
+        createCorners();
 
         auto bgInput = CCScale9Sprite::create("square02b_001.png");
         bgInput->setContentSize({360,30});
@@ -235,9 +195,25 @@ protected:
         auto categoryGameplay = CCMenuItemSpriteExtra::create(ButtonSprite::create("Gameplay"), this, menu_selector(requestTag::category));
         categoryGameplay->setTag(5);
         categoryMenu->addChild(categoryGameplay);
+
         categoryMenu->updateLayout();
 
-        createTagMenus();
+        menuCustom = createMenu("custom");
+        m_mainLayer->addChild(menuCustom);
+
+        menuStyle = createMenu("style");
+        menuStyle->setVisible(true);
+        m_mainLayer->addChild(menuStyle);
+
+        menuTheme = createMenu("theme");
+        m_mainLayer->addChild(menuTheme);
+
+        menuMeta = createMenu("meta");
+        m_mainLayer->addChild(menuMeta);
+
+        menuGameplay = createMenu("gameplay");
+        m_mainLayer->addChild(menuGameplay);
+
         addCustomMenu();
 
         auto loadingTags = LoadingSpinner::create(30);
@@ -266,58 +242,32 @@ protected:
         return true;
     };
 
-    void discord(CCObject* sender) {web::openLinkInBrowser("https://discord.gg/6GXYHf9WTB");};
+    void discord(CCObject* sender) {web::openLinkInBrowser("https://discord.gg/6GXYHf9WTB");}
 
     void category(CCObject* sender) {
         CCMenuItemSpriteExtra* category = static_cast<CCMenuItemSpriteExtra*>(sender);
+        menuCustom->setVisible(false);
+        menuStyle->setVisible(false);
+        menuTheme->setVisible(false);
+        menuMeta->setVisible(false);
+        menuGameplay->setVisible(false);
 
         switch (category->getTag()) {
-            case 1:
-                menuCustom->setVisible(true);
-                menuStyle->setVisible(false);
-                menuTheme->setVisible(false);
-                menuMeta->setVisible(false);
-                menuGameplay->setVisible(false);
-            break;
-            case 2:
-                menuCustom->setVisible(false);
-                menuStyle->setVisible(true);
-                menuTheme->setVisible(false);
-                menuMeta->setVisible(false);
-                menuGameplay->setVisible(false);
-            break;
-            case 3:
-                menuCustom->setVisible(false);
-                menuStyle->setVisible(false);
-                menuTheme->setVisible(true);
-                menuMeta->setVisible(false);
-                menuGameplay->setVisible(false);
-            break;
-            case 4:
-                menuCustom->setVisible(false);
-                menuStyle->setVisible(false);
-                menuTheme->setVisible(false);
-                menuMeta->setVisible(true);
-                menuGameplay->setVisible(false);
-            break;
-            case 5:
-                menuCustom->setVisible(false);
-                menuStyle->setVisible(false);
-                menuTheme->setVisible(false);
-                menuMeta->setVisible(false);
-                menuGameplay->setVisible(true);
-            break;
-        };
+            case 1: menuCustom->setVisible(true); break;
+            case 2: menuStyle->setVisible(true); break;
+            case 3: menuTheme->setVisible(true); break;
+            case 4: menuMeta->setVisible(true); break;
+            case 5: menuGameplay->setVisible(true); break;
+        }
     };
 
     void customAdd(CCObject* sender) {
-        if (tags.size() >= 10) return;
-        if (customInput->getString().size() < 2) return;
+        if (tags.size() >= 10 || customInput->getString().size() < 2) return;
         std::string tagString = customInput->getString();
         if (std::string tagString = customInput->getString(); tagString.size() > 20)  tagString = tagString.substr(0, 20) + "...";
         if (std::find(tags.begin(), tags.end(), tagString) != tags.end()) return;
-
         tags.push_back(tagString);
+
         auto tagNode = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::createWithSpriteFrameName("gimmicky.png"_spr), tagString.c_str(), "bigFont.fnt");
         tagNode->setScale(0.5);
         tagNode->setID(tagString.c_str());
@@ -332,8 +282,10 @@ protected:
 
         if (tags.size() <= 5) m_mainLayer->getChildByID("menu")->setLayout(AxisLayout::create()->setGap(5)->setDefaultScaleLimits(0.3f,1.f));
         if (tags.size() > 5) m_mainLayer->getChildByID("menu")->setLayout(AxisLayout::create()->setGap(2)->setDefaultScaleLimits(0.3f,0.6f)->setGrowCrossAxis(true));
+
         m_mainLayer->getChildByID("menu")->addChild(btn);
         m_mainLayer->getChildByID("menu")->updateLayout();
+
         limit->setString(fmt::format("{}/10", tags.size()).c_str());
         limit->setColor({static_cast<GLubyte>(std::clamp<int>((tags.size() / 10.0) * 255, 0, 255)), 0, 0});
         customInput->setString("");
@@ -341,8 +293,6 @@ protected:
 
     void btn(CCObject* sender) {
         CCMenuItemSpriteExtra* clickedButton = static_cast<CCMenuItemSpriteExtra*>(sender);
-
-        m_mainLayer->getChildByID("menu")->sortAllChildren();
 
         if (tags.size() <= 5) m_mainLayer->getChildByID("menu")->setLayout(AxisLayout::create()->setGap(5)->setDefaultScaleLimits(0.3f,1.f));
         if (tags.size() > 5) m_mainLayer->getChildByID("menu")->setLayout(AxisLayout::create()->setGap(2)->setDefaultScaleLimits(0.3f,0.6f)->setGrowCrossAxis(true));
@@ -353,18 +303,10 @@ protected:
             clickedButton->m_baseScale = 1;
             clickedButton->setScale(1);
             switch (clickedButton->getTag()) {
-                case 2:
-                    menuStyle->addChild(clickedButton);
-                break;
-                case 3:
-                    menuTheme->addChild(clickedButton);
-                break;
-                case 4:
-                    menuMeta->addChild(clickedButton);
-                break;
-                case 5:
-                    menuGameplay->addChild(clickedButton);
-                break;
+                case 2: menuStyle->addChild(clickedButton); break;
+                case 3: menuTheme->addChild(clickedButton); break;
+                case 4: menuMeta->addChild(clickedButton); break;
+                case 5: menuGameplay->addChild(clickedButton); break;
             }
             menuStyle->updateLayout();
             menuTheme->updateLayout();
@@ -418,7 +360,7 @@ protected:
 public:
     static requestTag* create(std::vector<std::variant<std::string, bool>> level) {
         auto ret = new requestTag();
-        if (ret->initAnchored(240.f, 160.f, level)) {
+        if (ret->initAnchored(400.f, 250.f, level)) {
             ret->autorelease();
             return ret;
         }

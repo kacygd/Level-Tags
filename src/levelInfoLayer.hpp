@@ -1,6 +1,6 @@
-#include "requestTag.hpp"
-
 using namespace geode::prelude;
+
+#include "requestTag.hpp"
 
 class $modify(ltLevelInfoLayer, LevelInfoLayer) {
     struct Fields {
@@ -8,25 +8,15 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
         std::map<int, std::vector<std::string>> jsonResponse;
     };
 
-    void request(CCObject* sender) {
-        requestTag::create({std::to_string(m_level->m_levelID.value()), m_level->isPlatformer()})->show();
-        //CCDirector::sharedDirector()->pushScene(levelTags::scene(m_level->m_levelID.value()));
-    };
-
-    CCMenuItemSpriteExtra* requestBtn() {
-        auto request = CCMenuItemSpriteExtra::create(
-            CircleButtonSprite::createWithSprite("icon.png"_spr, 1.2, CircleBaseColor::DarkPurple), this, menu_selector(ltLevelInfoLayer::request)
-        );
-        request->setID("tag-request");
-        return request;
-    }
+    void request(CCObject* sender) {requestTag::create({std::to_string(m_level->m_levelID.value()), m_level->isPlatformer()})->show();}
 
     $override
     bool init(GJGameLevel* level, bool challenge) {
         if (!LevelInfoLayer::init(level, challenge)) return false;
-        
+
         auto menu = this->getChildByID("left-side-menu");
-        auto request = requestBtn();
+        auto request = CCMenuItemSpriteExtra::create(CircleButtonSprite::createWithSprite("icon.png"_spr, 1.2, CircleBaseColor::DarkPurple), this, menu_selector(ltLevelInfoLayer::request));
+        request->setID("tag-request");
         menu->addChild(request);
         menu->updateLayout();
 
@@ -52,9 +42,8 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
 
         auto tagMenu = CCMenu::create();
         tagMenu->setContentWidth(winSize.width);
-        tagMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(3)->setAxisAlignment(AxisAlignment::Center));
-        tagMenu->setPosition({winSize.width / 2,winSize.height / 1.022f});
-        tagMenu->setScale(0.9);
+        tagMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(2)->setAxisAlignment(AxisAlignment::Center));
+        tagMenu->setPosition({winSize.width / 2, 313});
         tagMenu->setID("level-tags");
 
         return tagMenu;
@@ -66,16 +55,14 @@ class $modify(ltLevelInfoLayer, LevelInfoLayer) {
         auto tagMenu = createTagContainer();
         this->addChild(tagMenu);
 
-        int currentLevelID = m_level->m_levelID.value();
-        if (m_fields->jsonResponse.find(currentLevelID) != m_fields->jsonResponse.end()) {
-            auto tags = m_fields->jsonResponse[currentLevelID];
-            
+        if (m_fields->jsonResponse.find(m_level->m_levelID.value()) != m_fields->jsonResponse.end()) {
+            auto tags = m_fields->jsonResponse[m_level->m_levelID.value()];
             for (const auto& tag : tags) {
-                IconButtonSprite* tagNode = tagUtils::addTag(tag);
+                auto tagNode = CCMenuItemSpriteExtra::create(tagUtils::addTag(tag, 0.35), this, menu_selector(ltLevelCell::tagDesc));
+                tagNode->setID(tag);
                 tagMenu->addChild(tagNode);
                 tagMenu->updateLayout();
             }
-            tagMenu->updateLayout();
         }
     };
 };

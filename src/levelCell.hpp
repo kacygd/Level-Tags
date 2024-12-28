@@ -7,49 +7,34 @@ class $modify(ltLevelCell, LevelCell) {
     };
 
     void adjustPositions() {
-        bool levelPlaceExists = m_mainLayer->getChildByID("level-place") != nullptr;
         auto mainMenu = m_mainLayer->getChildByID("main-menu");
-
-        if (auto title = m_mainLayer->getChildByID("level-name")) title->setPositionY(levelPlaceExists ? 42 : 77);
-        if (auto copy = m_mainLayer->getChildByID("copy-indicator")) copy->setPositionY(levelPlaceExists ? 40 : 55);
-        if (auto highObject = m_mainLayer->getChildByID("high-object-indicator")) highObject->setPositionY(levelPlaceExists ? 40 : 55);
-        if (auto ncsIcon = m_mainLayer->getChildByID("ncs-icon")) ncsIcon->setPositionY(levelPlaceExists ? 27.5 : 39.5);
-        if (auto creatorName = mainMenu->getChildByID("creator-name")) creatorName->setPositionY(creatorName->getPositionY() + (levelPlaceExists ? 0 : 4));
-        if (auto songName = m_mainLayer->getChildByID("song-name")) songName->setPositionY(levelPlaceExists ? 28 : 40);
-        if (levelPlaceExists) {
-            for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3"}) {
-                if (auto icon = m_mainLayer->getChildByID(id)) icon->setPositionY(26.5);
-            }
-        }
-        for (const auto& id : {"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}) {
-            if (auto icon = m_mainLayer->getChildByID(id)) icon->setPositionY(levelPlaceExists ? 6 : 10);
-        }
+        if (auto title = m_mainLayer->getChildByID("level-name")) title->setPositionY(m_compactView ? 42 : 77);
+        if (auto copy = m_mainLayer->getChildByID("copy-indicator")) copy->setPositionY(m_compactView ? 40 : 55);
+        if (auto highObject = m_mainLayer->getChildByID("high-object-indicator")) highObject->setPositionY(m_compactView ? 40 : 55);
+        if (auto ncsIcon = m_mainLayer->getChildByID("ncs-icon")) ncsIcon->setPositionY(m_compactView ? 27.5 : 39.5);
+        if (auto creatorName = mainMenu->getChildByID("creator-name")) creatorName->setPositionY(creatorName->getPositionY() + (m_compactView ? 0 : 4));
+        if (auto songName = m_mainLayer->getChildByID("song-name")) songName->setPositionY(m_compactView ? 28 : 40);
+        if (m_compactView) for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setPositionY(26.5);
+        for (const auto& id : {"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setPositionY(m_compactView ? 6 : 10);
     };
 
     void loadCustomLevelCell() {
         LevelCell::loadCustomLevelCell();
         if (!Mod::get()->getSettingValue<bool>("levelcellShow")) return;
 
-            m_fields->m_listener.bind([this](web::WebTask::Event* e) {
-                if (auto res = e->getValue(); res && res->ok()) {
-                    auto json = matjson::parse(res->string().unwrapOr("[]")).unwrapOr("[]");
-                    m_fields->jsonResponse[m_level->m_levelID.value()] = json.as<std::vector<std::string>>().unwrap();
-                    updateTags(false);
-                    adjustPositions();
-                }
-            });
-
+        m_fields->m_listener.bind([this](web::WebTask::Event* e) {
+            if (auto res = e->getValue(); res && res->ok()) {
+                auto json = matjson::parse(res->string().unwrapOr("[]")).unwrapOr("[]");
+                m_fields->jsonResponse[m_level->m_levelID.value()] = json.as<std::vector<std::string>>().unwrap();
+                updateTags(false);
+                adjustPositions();
+            }
+        });
         auto req = web::WebRequest();
-
-        m_fields->m_listener.setFilter(
-            req.get(fmt::format("https://raw.githubusercontent.com/KampWskiR/test3/main/{}.json", m_level ? m_level->m_levelID.value() : GameLevelManager::sharedState()->m_dailyID))
-        );
+        m_fields->m_listener.setFilter(req.get(fmt::format("https://raw.githubusercontent.com/KampWskiR/test3/main/{}.json", m_level ? m_level->m_levelID.value() : GameLevelManager::sharedState()->m_dailyID)));
     };
 
     CCMenu* createTagContainer(bool extended) {
-        bool list = false;
-        if (m_mainLayer->getChildByID("level-place") && m_mainLayer->getChildByID("level-place")->isVisible()) list = true;
-
         auto tagMenu = CCMenu::create();
         tagMenu->setContentSize({230, 12});
         tagMenu->setPosition({m_compactView ? 46.0f : 53.0f, m_compactView ? 21.0f : 31.0f});
@@ -57,23 +42,19 @@ class $modify(ltLevelCell, LevelCell) {
         tagMenu->setScale(m_compactView ? 0.75 : 1);
         tagMenu->setID("level-tags");
         
-        if (list) tagMenu->setPositionX(66);
         if (extended) {
-            tagMenu->setLayout(RowLayout::create()->setGrowCrossAxis(true)->setAutoScale(false)->setGap(3)->setAxisAlignment(AxisAlignment::Start));
+            tagMenu->setLayout(RowLayout::create()->setGrowCrossAxis(true)->setAutoScale(false)->setGap(m_compactView ? 1 : 3)->setAxisAlignment(AxisAlignment::Start));
         } else {
-            tagMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(3)->setAxisAlignment(AxisAlignment::Start));
+            tagMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(m_compactView ? 1 : 3)->setAxisAlignment(AxisAlignment::Start));
         }
+        if (m_mainLayer->getChildByID("level-place") && m_mainLayer->getChildByID("level-place")->isVisible()) tagMenu->setPositionX(66);
 
         return tagMenu;
     };
 
     void tagDesc(CCObject* sender) {
         CCMenuItemSpriteExtra* clickedButton = static_cast<CCMenuItemSpriteExtra*>(sender);
-        FLAlertLayer::create(
-            clickedButton->getID().c_str(),
-            tagUtils::getTagDesc(clickedButton->getID().c_str()),
-            "OK"
-        )->show();
+        tagDesc::create(clickedButton->getID().c_str())->show();
     };
     
     void updateTags(bool extended) {
@@ -82,22 +63,17 @@ class $modify(ltLevelCell, LevelCell) {
         auto tagMenu = createTagContainer(extended);
         m_mainLayer->addChild(tagMenu);
 
-        int currentLevelID = m_level->m_levelID.value();
-        if (m_fields->jsonResponse.find(currentLevelID) != m_fields->jsonResponse.end()) {
-            auto tags = m_fields->jsonResponse[currentLevelID];
+        if (m_fields->jsonResponse.find(m_level->m_levelID.value()) != m_fields->jsonResponse.end()) {
+            auto tags = m_fields->jsonResponse[m_level->m_levelID.value()];
 
             for (const auto& tag : tags) {
-                auto spr = tagUtils::addTag(tag);
-                spr->setScale(0.35);
-                auto tagNode = CCMenuItemSpriteExtra::create(spr, this, menu_selector(ltLevelCell::tagDesc));
-
+                auto tagNode = CCMenuItemSpriteExtra::create(tagUtils::addTag(tag, 0.35), this, menu_selector(ltLevelCell::tagDesc));
                 tagNode->setID(tag);
                 tagMenu->addChild(tagNode);
                 tagMenu->updateLayout();
 
                 if (!extended && tagNode->getPositionX() > 150) {
                     tagNode->setAnchorPoint({0.5, 0.5});
-
                     if (tags.size() == tagMenu->getChildrenCount()) break;
 
                     auto expandSpr = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::createWithSpriteFrameName("PBtn_Arrow_001.png"), "more", "bigFont.fnt");
@@ -126,35 +102,34 @@ class $modify(ltLevelCell, LevelCell) {
                 tagMenu->addChild(tagExpand);
                 tagMenu->updateLayout();
             };
-
+            
             if (tagMenu->getContentHeight() > 28) {
-                tagMenu->setPositionY(m_compactView ? 35 : 45);
-                m_mainLayer->getChildByID("song-name")->setVisible(false);
-                for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3"}) {
-                    if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
+                if (tagMenu->getContentHeight() > 55) {
+                    tagMenu->setPositionY(m_compactView ? 46 : 62);
+                    m_mainLayer->getChildByID("level-name")->setVisible(!m_compactView);
+                    m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name")->setVisible(false);
+                    for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3", "copy-indicator", "high-object-indicator", "song-name"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
+                } else {
+                    tagMenu->setPositionY(m_compactView ? 35 : 45);
+                    for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3", "song-name"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
+                    for (const auto& id : {"copy-indicator", "high-object-indicator", "level-name"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(true);
+                    m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name")->setVisible(true);
                 }
             } else {
-                m_mainLayer->getChildByID("song-name")->setVisible(true);
-                for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3"}) {
-                    if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(true);
-                }
+                for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3", "copy-indicator", "high-object-indicator", "song-name", "level-name"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(true);
+                m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name")->setVisible(true);
             }
-
             tagMenu->updateLayout();
         }
     };
 
     void expandTags(CCObject* sender) {
-        for (const auto& id : {"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}) {
-            if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
-        }
+        for (const auto& id : {"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
         updateTags(true);
     };
 
     void collapseTags(CCObject* sender) {
-        for (const auto& id : {"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}) {
-            if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(true);
-        }
+        for (const auto& id : {"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(true);
         updateTags(false);
     };
 };
