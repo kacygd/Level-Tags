@@ -199,20 +199,11 @@ protected:
         categoryMenu->updateLayout();
 
         menuCustom = createMenu("custom");
-        m_mainLayer->addChild(menuCustom);
-
         menuStyle = createMenu("style");
         menuStyle->setVisible(true);
-        m_mainLayer->addChild(menuStyle);
-
         menuTheme = createMenu("theme");
-        m_mainLayer->addChild(menuTheme);
-
         menuMeta = createMenu("meta");
-        m_mainLayer->addChild(menuMeta);
-
         menuGameplay = createMenu("gameplay");
-        m_mainLayer->addChild(menuGameplay);
 
         addCustomMenu();
 
