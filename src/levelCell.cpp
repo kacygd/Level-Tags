@@ -1,6 +1,12 @@
+#include <Geode/Geode.hpp>
+#include <Geode/utils/web.hpp>
+#include "utils.hpp"
+#include "tagDesc.hpp"
+#include <Geode/modify/LevelCell.hpp>
+
 using namespace geode::prelude;
 
-class $modify(ltLevelCell, LevelCell) {
+class $modify(TagsLevelCell, LevelCell) {
     struct Fields {
         EventListener<web::WebTask> m_listener;
         std::map<int, std::vector<std::string>> jsonResponse;
@@ -24,14 +30,34 @@ class $modify(ltLevelCell, LevelCell) {
 
         m_fields->m_listener.bind([this](web::WebTask::Event* e) {
             if (auto res = e->getValue(); res && res->ok()) {
-                auto json = matjson::parse(res->string().unwrapOr("[]")).unwrapOr("[]");
-                m_fields->jsonResponse[m_level->m_levelID.value()] = json.as<std::vector<std::string>>().unwrap();
-                updateTags(false);
+                auto jsonStr = res->string().unwrapOr("{}");
+                auto json = matjson::parse(jsonStr).unwrapOr("{}");
+                std::vector<std::string> result;
+                std::vector<std::string> order;
+                if (Mod::get()->getSettingValue<std::string>("tags-order") == "style, theme, meta, gameplay") {
+                    order = {"style", "theme", "meta", "gameplay"};
+                } else if (Mod::get()->getSettingValue<std::string>("tags-order") == "meta, gameplay, style, theme") {
+                    order = {"meta", "gameplay", "style", "theme"};
+                } else if (Mod::get()->getSettingValue<std::string>("tags-order") == "gameplay, meta, style, theme") {
+                    order = {"gameplay", "meta", "style", "theme"};
+                }
+                for (auto key : order) {
+                    if (json.contains(key)) {
+                        for (auto i = 0; i < json[key].size(); i++) {
+                            result.push_back(json[key][i].as<std::string>().unwrap());
+                        }
+                    }
+                }
                 adjustPositions();
+                m_fields->jsonResponse[m_level->m_levelID.value()] = result;
+                updateTags(false);
             }
         });
+
         auto req = web::WebRequest();
-        m_fields->m_listener.setFilter(req.get(fmt::format("https://raw.githubusercontent.com/KampWskiR/test3/main/{}.json", m_level ? m_level->m_levelID.value() : GameLevelManager::sharedState()->m_dailyID)));
+        m_fields->m_listener.setFilter(req.get(
+            fmt::format("https://raw.githubusercontent.com/KampWskiR/test3/main/tags/{}.json",m_level ? m_level->m_levelID.value() : GameLevelManager::sharedState()->m_dailyID)
+        ));
     };
 
     CCMenu* createTagContainer(bool extended) {
@@ -51,11 +77,6 @@ class $modify(ltLevelCell, LevelCell) {
 
         return tagMenu;
     };
-
-    void tagDesc(CCObject* sender) {
-        CCMenuItemSpriteExtra* clickedButton = static_cast<CCMenuItemSpriteExtra*>(sender);
-        tagDesc::create(clickedButton->getID().c_str())->show();
-    };
     
     void updateTags(bool extended) {
         if (m_mainLayer->getChildByID("level-tags")) m_mainLayer->removeChildByID("level-tags");
@@ -67,7 +88,7 @@ class $modify(ltLevelCell, LevelCell) {
             auto tags = m_fields->jsonResponse[m_level->m_levelID.value()];
 
             for (const auto& tag : tags) {
-                auto tagNode = CCMenuItemSpriteExtra::create(tagUtils::addTag(tag, 0.35), this, menu_selector(ltLevelCell::tagDesc));
+                auto tagNode = CCMenuItemSpriteExtra::create(TagUtils::addTag(tag, 0.35), this, menu_selector(TagDesc::open));
                 tagNode->setID(tag);
                 tagMenu->addChild(tagNode);
                 tagMenu->updateLayout();
@@ -79,7 +100,7 @@ class $modify(ltLevelCell, LevelCell) {
                     auto expandSpr = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::createWithSpriteFrameName("PBtn_Arrow_001.png"), "more", "bigFont.fnt");
                     expandSpr->setScale(0.35);
 
-                    auto tagExpand = CCMenuItemSpriteExtra::create(expandSpr, this, menu_selector(ltLevelCell::expandTags));
+                    auto tagExpand = CCMenuItemSpriteExtra::create(expandSpr, this, menu_selector(TagsLevelCell::expandTags));
                     tagExpand->setAnchorPoint({0.5, 0.5});
                     tagExpand->setColor({255,255,255});
                     tagExpand->setOpacity(255);
@@ -95,7 +116,7 @@ class $modify(ltLevelCell, LevelCell) {
                 auto expandSpr = IconButtonSprite::create("tagSquare.png"_spr, arrow, "less", "bigFont.fnt");
                 expandSpr->setScale(0.35);
 
-                auto tagExpand = CCMenuItemSpriteExtra::create(expandSpr, this, menu_selector(ltLevelCell::collapseTags));
+                auto tagExpand = CCMenuItemSpriteExtra::create(expandSpr, this, menu_selector(TagsLevelCell::collapseTags));
                 tagExpand->setAnchorPoint({0.5, 0.5});
                 tagExpand->setColor({255,255,255});
                 tagExpand->setOpacity(255);

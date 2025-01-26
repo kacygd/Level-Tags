@@ -1,15 +1,15 @@
 {
-	"geode": "4.1.2",
+	"geode": "4.2.0",
 	"gd": {
 		"win": "2.2074",
 		"mac": "2.2074",
 		"android": "2.2074"
 	},
-	"version": "v0.2.2-alpha",
+	"version": "v0.3.0-alpha",
 	"id": "kampwski.level_tags",
 	"name": "Level Tags",
 	"developer": "KampWski",
-	"description": "Mod adding tags to levels",
+	"description": "A mod that adds tags to levels.",
 	"dependencies": [
 		{
 			"id": "geode.node-ids",
@@ -22,7 +22,6 @@
 		"utility",
 		"online"
 	],
-	"repository": "https://github.com/KampWskiR/Level-Tags",
 	"resources": {
 		"sprites": [
 			"resources/*.png",
@@ -35,9 +34,15 @@
 		}
 	},
 	"links": {
+		"source": "https://github.com/KampWskiR/Level-Tags",
 		"community": "https://discord.gg/6GXYHf9WTB"
 	},
 	"settings": {
+		"customization": {
+            "name": "Customization",
+            "type": "title",
+            "description": "These are settings that will customize your experience as best as possible."
+        },
 		"levelcellShow": {
 			"name": "LevelCell Tags",
 			"description": "Enable Tags displaying in LevelCell",
@@ -47,6 +52,28 @@
 		"levelInfoShow": {
 			"name": "LevelInfoLayer Tags",
 			"description": "Enable tags displaying in LevelInfoLayer",
+			"type": "bool",
+			"default": false
+		},
+		"hideRequest": {
+			"name": "Hide Request Button",
+			"type": "bool",
+			"default": false
+		},
+		"tags-order": {
+			"name": "Tag Order",
+			"type": "string",
+			"default": "style, theme, meta, gameplay",
+			"one-of": ["style, theme, meta, gameplay","meta, gameplay, style, theme","gameplay, meta, style, theme"]
+		},
+		"experiments": {
+            "name": "Experiments",
+            "type": "title",
+            "description": "These are unfinished features that may not work as expected. here be dragons."
+        },
+		"beta-search": {
+			"name": "Beta Search",
+			"description": "Enable tag searching (experiment).",
 			"type": "bool",
 			"default": false
 		}

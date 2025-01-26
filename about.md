@@ -1,13 +1,15 @@
 # Level Tags
 
-A simple mod that adds tags to levels indicating their style, gameplay, and more.
-
-<cr>The mod is still in alpha, so if you run into any bugs or have feedback, feel free to DM me on Discord @kampwski</cr>
+A mod that adds tags to levels and allows to discover them based on specific styles, themes or gameplay types.
 
 # Planned Features
-- Level Tag Browser
+- Better Tags Search
 - Tags in local levels
 - More Customization
+
+# [Discord](https://discord.gg/6GXYHf9WTB)
+Join our Discord to stay up to date with updates and get early access.
+Suggest tags or features and report any issues or bugs.
 
 # Credits
 
@@ -19,16 +21,8 @@ A simple mod that adds tags to levels indicating their style, gameplay, and more
 
 **[mariokirby1703](user:4685259)**: Moderator
 
-**[NamedNoxy](user:24363304)**: Tester & Redesign concept
+**[NamedNoxy](user:24363304)**: Redesign concept
 
 **[Pafciu](user:9282706)**:  Tester
 
-**[TheKeltix](user:20671651)**: Tester
-
 **[Rafixio](user:26325096)**: Tester
-
-**[IIHypN0II](user:14598442)**: Tester
-
-**[Mezziu](user:19396692)**: Tester
-
-**[dashereq](user:25307301)**: Tester

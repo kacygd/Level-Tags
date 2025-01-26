@@ -1,3 +1,8 @@
+# v0.3.0-alpha
+- Added the ability to customize the order of tags.
+- Added a Search Experiment.
+- The tags request has been temporarily closed.
+
 # v0.2.2-alpha
 - Added descriptions to tags
 - Requested tags list is now server-sided

@@ -1,29 +1,31 @@
 #include <Geode/Geode.hpp>
-#include <Geode/modify/LevelInfoLayer.hpp>
-#include <Geode/modify/LevelBrowserLayer.hpp>
-#include <Geode/modify/InfoLayer.hpp>
-#include <Geode/modify/LevelCell.hpp>
-#include <Geode/cocos/cocoa/CCObject.h>
-#include <Geode/modify/FLAlertLayer.hpp>
-#include <Geode/binding/DailyLevelPage.hpp>
 #include <Geode/utils/web.hpp>
-#include <Geode/loader/Event.hpp>
-#include <fmt/core.h>
-#include <fmt/format.h>
-#include <algorithm>
-#include <Geode/binding/CCMenuItemToggler.hpp>
-#include <vector>
-#include <functional>
-#include <matjson.hpp>
-#include <string>
-#include <unordered_map>
-#include <map>
-#include <array>
-#include <Geode/ui/ScrollLayer.hpp>
 #include <Geode/ui/LoadingSpinner.hpp>
-#include <Geode/ui/BasedButtonSprite.hpp>
+#include <Geode/modify/LevelSearchLayer.hpp>
 
 #include "utils.hpp"
+#include "tagDesc.hpp"
+#include "levelCell.cpp"
+#include "levelInfoLayer.cpp"
+#include "betaSearch.hpp"
 
-#include "levelCell.hpp"
-#include "levelInfoLayer.hpp"
+using namespace geode::prelude;
+
+class $modify(TagsLevelSearchLayer, LevelSearchLayer) {
+    $override
+    bool init(int p0) {
+        if (!LevelSearchLayer::init(p0)) return false;
+        if (!Mod::get()->getSettingValue<bool>("beta-search")) return true;
+
+        if (auto menu = this->getChildByID("other-filter-menu")) {
+            auto searchBtn = CCMenuItemSpriteExtra::create(
+                CircleButtonSprite::createWithSprite("icon.png"_spr, 1.2, CircleBaseColor::DarkPurple), this, menu_selector(TagsLevelSearchLayer::menu)
+            );
+            menu->addChild(searchBtn);
+            menu->updateLayout();
+        }
+
+        return true;
+    };
+    void menu(CCObject* sender) {BetaSearch::create("")->show();}
+};
