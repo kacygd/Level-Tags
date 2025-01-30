@@ -45,7 +45,7 @@ bool RequestTag::setup(std::vector<std::variant<std::string, bool>> level) {
 }
 
 void RequestTag::discord(CCObject* sender) {
-    web::openLinkInBrowser("https://discord.gg/6GXYHf9WTB");
+    web::openLinkInBrowser("https://discord.gg/eZcynVMhrF");
 }
 
 RequestTag* RequestTag::create(std::vector<std::variant<std::string, bool>> level) {
