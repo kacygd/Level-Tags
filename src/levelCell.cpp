@@ -56,7 +56,7 @@ class $modify(TagsLevelCell, LevelCell) {
 
         auto req = web::WebRequest();
         m_fields->m_listener.setFilter(req.get(
-            fmt::format("https://cps.ps.fhgdps.com/v1/{}.json",m_level ? m_level->m_levelID.value() : GameLevelManager::sharedState()->m_dailyID)
+            fmt::format("https://cps.ps.fhgdps.com/v1/tags/{}.json",m_level ? m_level->m_levelID.value() : GameLevelManager::sharedState()->m_dailyID)
         ));
     };
 
