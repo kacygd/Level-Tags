@@ -144,7 +144,7 @@ bool BetaSearch::setup(std::string tag) {
         }
     });
     auto req = web::WebRequest();
-    m_listener.setFilter(req.get("https://raw.githubusercontent.com/kacygd/v1/refs/heads/main/tags.json"));
+    m_listener.setFilter(req.get("https://cps.ps.fhgdps.com/v1/tags.json"));
 
     return true;
 }
@@ -217,7 +217,7 @@ void BetaSearch::search(CCObject*) {
     });
 
     auto req = web::WebRequest();
-    m_listener.setFilter(req.get("https://raw.githubusercontent.com/kacygd/v1/refs/heads/main/leveltags.json"));
+    m_listener.setFilter(req.get("https://cps.ps.fhgdps.com/v1/leveltags.json"));
 }
 
 
