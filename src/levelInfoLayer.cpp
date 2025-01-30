@@ -61,7 +61,7 @@ class $modify(TagsLevelInfoLayer, LevelInfoLayer) {
         });
 
         auto req = web::WebRequest();
-        m_fields->m_listener.setFilter(req.get(fmt::format("https://cps.ps.fhgdps.com/v1/{}.json", m_level->m_levelID.value())));
+        m_fields->m_listener.setFilter(req.get(fmt::format("https://cps.ps.fhgdps.com/v1/tags/{}.json", m_level->m_levelID.value())));
     };
 
     CCMenu* createTagContainer() {
