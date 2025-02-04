@@ -25,7 +25,7 @@ IconButtonSprite* TagUtils::addTag(std::string tag, float scale) {
     if (std::unordered_set<std::string>{
         "generic", "tech", "effect", "design", "layout", "modern", "art", "ambience", "animation", 
         "cartoon", "realism", "core", "minigame", "simplism", "atmospheric", "experimental", 
-        "standard", "recreation", "sunset"
+        "standard", "recreation", "sunset", "ecletic"
     }.count(tag)) {
         tagNode->setIcon(CCSprite::createWithSpriteFrameName("style.png"_spr));
     }

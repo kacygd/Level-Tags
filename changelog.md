@@ -1,3 +1,9 @@
+# v0.3.1-alpha
+- Beta search visual changes
+- Added sorting to beta search
+- Added a tag info tab in the search
+- Added more space in expanded LevelCell
+
 # v0.3.0-alpha
 - Added the ability to customize the order of tags.
 - Added a Search Experiment.

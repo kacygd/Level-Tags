@@ -125,11 +125,20 @@ class $modify(TagsLevelCell, LevelCell) {
             };
             
             if (tagMenu->getContentHeight() > 28) {
-                if (tagMenu->getContentHeight() > 55) {
-                    tagMenu->setPositionY(m_compactView ? 46 : 62);
-                    m_mainLayer->getChildByID("level-name")->setVisible(!m_compactView);
-                    m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name")->setVisible(false);
-                    for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3", "copy-indicator", "high-object-indicator", "song-name"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
+                if (tagMenu->getContentHeight() > 50) {
+                    if (tagMenu->getContentHeight() > 70) {
+                        tagMenu->setPositionY(m_compactView ? 48 : 85);
+                        if (m_compactView) tagMenu->setScale(0.7);
+                        m_mainLayer->getChildByID("level-name")->setVisible(false);
+                        m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name")->setVisible(false);
+                        for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3", "copy-indicator", "high-object-indicator", "song-name"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
+                    } else {
+                        tagMenu->setPositionY(m_compactView ? 48 : 62);
+                        if (m_compactView) tagMenu->setScale(0.7);
+                        m_mainLayer->getChildByID("level-name")->setVisible(!m_compactView);
+                        m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name")->setVisible(false);
+                        for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3", "copy-indicator", "high-object-indicator", "song-name"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
+                    }
                 } else {
                     tagMenu->setPositionY(m_compactView ? 35 : 45);
                     for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3", "song-name"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);

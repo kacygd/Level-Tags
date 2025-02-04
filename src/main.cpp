@@ -8,6 +8,7 @@
 #include "levelCell.cpp"
 #include "levelInfoLayer.cpp"
 #include "betaSearch.hpp"
+#include "tagInfo.hpp"
 
 using namespace geode::prelude;
 
