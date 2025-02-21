@@ -4,14 +4,11 @@
 #include <Geode/modify/LevelSearchLayer.hpp>
 #include <Geode/modify/MenuLayer.hpp>
 
-#include "tagsManager.hpp"
 #include "tagDesc.hpp"
 #include "levelCell.cpp"
 #include "levelInfoLayer.cpp"
 #include "betaSearch.hpp"
-#include "modTools/modTools.hpp"
 #include "tagInfo.hpp"
-#include "modTools/modManager.hpp"
 
 using namespace geode::prelude;
 
