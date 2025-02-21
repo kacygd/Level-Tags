@@ -1,3 +1,10 @@
+# v0.3.2-alpha
+- Added Pause Screen tags option
+- Added tags and descriptions caching
+- Added extra tag expanding
+- Small tweaks in levelCell
+- Improved tags description popup
+
 # v0.3.1-alpha
 - Beta search visual changes
 - Added sorting to beta search

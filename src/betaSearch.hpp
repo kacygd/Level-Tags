@@ -1,6 +1,10 @@
 #pragma once
 
 #include <Geode/utils/web.hpp>
+#include <Geode/ui/LoadingSpinner.hpp>
+#include <random>
+#include "tagsManager.hpp"
+#include "tagInfo.hpp"
 
 using namespace geode::prelude;
 

@@ -1,6 +1,6 @@
 #include <Geode/Geode.hpp>
 #include <Geode/utils/web.hpp>
-#include "utils.hpp"
+#include "tagsManager.hpp"
 #include "tagDesc.hpp"
 #include <Geode/modify/LevelCell.hpp>
 
@@ -9,7 +9,8 @@ using namespace geode::prelude;
 class $modify(TagsLevelCell, LevelCell) {
     struct Fields {
         EventListener<web::WebTask> m_listener;
-        std::map<int, std::vector<std::string>> jsonResponse;
+        matjson::Value tags;
+        bool extended = false;
     };
 
     void adjustPositions() {
@@ -21,35 +22,30 @@ class $modify(TagsLevelCell, LevelCell) {
         if (auto creatorName = mainMenu->getChildByID("creator-name")) creatorName->setPositionY(creatorName->getPositionY() + (m_compactView ? 0 : 4));
         if (auto songName = m_mainLayer->getChildByID("song-name")) songName->setPositionY(m_compactView ? 28 : 40);
         if (m_compactView) for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setPositionY(26.5);
-        for (const auto& id : {"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setPositionY(m_compactView ? 6 : 10);
+        for (const auto& id : {"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}) {
+            if (auto icon = m_mainLayer->getChildByID(id)) icon->setPositionY(m_compactView ? 6 : 10);
+        }
     };
 
     void loadCustomLevelCell() {
         LevelCell::loadCustomLevelCell();
         if (!Mod::get()->getSettingValue<bool>("levelcellShow")) return;
 
+        if (TagsManager::sharedState()->cachedTags[std::to_string(m_level->m_levelID)].size() != 0) {
+            adjustPositions();
+            m_fields->tags = TagsManager::sortTags(TagsManager::sharedState()->cachedTags[std::to_string(m_level->m_levelID)]);
+            updateTags(false);
+            return;
+        }
+
         m_fields->m_listener.bind([this](web::WebTask::Event* e) {
             if (auto res = e->getValue(); res && res->ok()) {
                 auto jsonStr = res->string().unwrapOr("{}");
                 auto json = matjson::parse(jsonStr).unwrapOr("{}");
-                std::vector<std::string> result;
-                std::vector<std::string> order;
-                if (Mod::get()->getSettingValue<std::string>("tags-order") == "style, theme, meta, gameplay") {
-                    order = {"style", "theme", "meta", "gameplay"};
-                } else if (Mod::get()->getSettingValue<std::string>("tags-order") == "meta, gameplay, style, theme") {
-                    order = {"meta", "gameplay", "style", "theme"};
-                } else if (Mod::get()->getSettingValue<std::string>("tags-order") == "gameplay, meta, style, theme") {
-                    order = {"gameplay", "meta", "style", "theme"};
-                }
-                for (auto key : order) {
-                    if (json.contains(key)) {
-                        for (auto i = 0; i < json[key].size(); i++) {
-                            result.push_back(json[key][i].as<std::string>().unwrap());
-                        }
-                    }
-                }
+
                 adjustPositions();
-                m_fields->jsonResponse[m_level->m_levelID.value()] = result;
+                m_fields->tags = TagsManager::sortTags(json);
+                TagsManager::sharedState()->cachedTags[std::to_string(m_level->m_levelID)] = json;
                 updateTags(false);
             }
         });
@@ -65,7 +61,6 @@ class $modify(TagsLevelCell, LevelCell) {
         tagMenu->setContentSize({230, 12});
         tagMenu->setPosition({m_compactView ? 46.0f : 53.0f, m_compactView ? 21.0f : 31.0f});
         tagMenu->setAnchorPoint({0,1});
-        tagMenu->setScale(m_compactView ? 0.75 : 1);
         tagMenu->setID("level-tags");
         
         if (extended) {
@@ -81,26 +76,26 @@ class $modify(TagsLevelCell, LevelCell) {
     void updateTags(bool extended) {
         if (m_mainLayer->getChildByID("level-tags")) m_mainLayer->removeChildByID("level-tags");
 
+        m_fields->extended = extended;
+
         auto tagMenu = createTagContainer(extended);
         m_mainLayer->addChild(tagMenu);
 
-        if (m_fields->jsonResponse.find(m_level->m_levelID.value()) != m_fields->jsonResponse.end()) {
-            auto tags = m_fields->jsonResponse[m_level->m_levelID.value()];
+        if (!m_fields->tags.isNull() && m_fields->tags.isArray()) {
 
-            for (const auto& tag : tags) {
-                auto tagNode = CCMenuItemSpriteExtra::create(TagUtils::addTag(tag, 0.35), this, menu_selector(TagDesc::open));
-                tagNode->setID(tag);
+            for (auto& tag : m_fields->tags) {
+                auto tagNode = CCMenuItemSpriteExtra::create(TagsManager::addTag(tag.asString().unwrapOr(""), m_compactView ? 0.25 : 0.35), this, menu_selector(TagDesc::open));
+                tagNode->setID(tag.asString().unwrapOr(""));
                 tagMenu->addChild(tagNode);
                 tagMenu->updateLayout();
-
-                if (!extended && tagNode->getPositionX() > 150) {
+                if (!extended && tagNode->getPositionX() > 125) {
                     tagNode->setAnchorPoint({0.5, 0.5});
-                    if (tags.size() == tagMenu->getChildrenCount()) break;
+                    if (m_fields->tags.size() == tagMenu->getChildrenCount()) break;
 
                     auto expandSpr = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::createWithSpriteFrameName("PBtn_Arrow_001.png"), "more", "bigFont.fnt");
-                    expandSpr->setScale(0.35);
+                    expandSpr->setScale(m_compactView ? 0.25 : 0.35);
 
-                    auto tagExpand = CCMenuItemSpriteExtra::create(expandSpr, this, menu_selector(TagsLevelCell::expandTags));
+                    auto tagExpand = CCMenuItemSpriteExtra::create(expandSpr, this, menu_selector(TagsLevelCell::setExpand));
                     tagExpand->setAnchorPoint({0.5, 0.5});
                     tagExpand->setColor({255,255,255});
                     tagExpand->setOpacity(255);
@@ -114,52 +109,46 @@ class $modify(TagsLevelCell, LevelCell) {
                 auto arrow = CCSprite::createWithSpriteFrameName("PBtn_Arrow_001.png");
                 arrow->setRotation(180);
                 auto expandSpr = IconButtonSprite::create("tagSquare.png"_spr, arrow, "less", "bigFont.fnt");
-                expandSpr->setScale(0.35);
+                expandSpr->setScale(m_compactView ? 0.25 : 0.35);
 
-                auto tagExpand = CCMenuItemSpriteExtra::create(expandSpr, this, menu_selector(TagsLevelCell::collapseTags));
+                auto tagExpand = CCMenuItemSpriteExtra::create(expandSpr, this, menu_selector(TagsLevelCell::setExpand));
                 tagExpand->setAnchorPoint({0.5, 0.5});
                 tagExpand->setColor({255,255,255});
                 tagExpand->setOpacity(255);
                 tagMenu->addChild(tagExpand);
                 tagMenu->updateLayout();
             };
-            
-            if (tagMenu->getContentHeight() > 28) {
-                if (tagMenu->getContentHeight() > 50) {
-                    if (tagMenu->getContentHeight() > 70) {
-                        tagMenu->setPositionY(m_compactView ? 48 : 85);
-                        if (m_compactView) tagMenu->setScale(0.7);
-                        m_mainLayer->getChildByID("level-name")->setVisible(false);
-                        m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name")->setVisible(false);
-                        for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3", "copy-indicator", "high-object-indicator", "song-name"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
-                    } else {
-                        tagMenu->setPositionY(m_compactView ? 48 : 62);
-                        if (m_compactView) tagMenu->setScale(0.7);
-                        m_mainLayer->getChildByID("level-name")->setVisible(!m_compactView);
-                        m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name")->setVisible(false);
-                        for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3", "copy-indicator", "high-object-indicator", "song-name"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
-                    }
-                } else {
-                    tagMenu->setPositionY(m_compactView ? 35 : 45);
-                    for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3", "song-name"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
-                    for (const auto& id : {"copy-indicator", "high-object-indicator", "level-name"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(true);
-                    m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name")->setVisible(true);
-                }
+
+            auto iconIds = {"coin-icon-1", "coin-icon-2", "coin-icon-3", "copy-indicator", "high-object-indicator", "song-name"};
+            if ((m_compactView && tagMenu->getContentHeight() > 36) || (!m_compactView && tagMenu->getContentHeight() > 70)) {
+                tagMenu->setPositionY(m_compactView ? 48 : 85);
+                m_mainLayer->getChildByID("level-name")->setVisible(false);
+                m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name")->setVisible(false);
+                for (const auto& id : iconIds) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
+            } else if (tagMenu->getContentHeight() > 50) {
+                tagMenu->setPositionY(m_compactView ? 48 : 62);
+                if (m_compactView) tagMenu->setScale(0.7);
+                m_mainLayer->getChildByID("level-name")->setVisible(!m_compactView);
+                m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name")->setVisible(false);
+                for (const auto& id : iconIds) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
+            } else if (tagMenu->getContentHeight() > 28) {
+                tagMenu->setPositionY(m_compactView ? 32 : 45);
+                for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3", "song-name"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
+                for (const auto& id : {"copy-indicator", "high-object-indicator", "level-name"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(true);
+                m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name")->setVisible(true);
             } else {
-                for (const auto& id : {"coin-icon-1", "coin-icon-2", "coin-icon-3", "copy-indicator", "high-object-indicator", "song-name", "level-name"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(true);
+                for (const auto& id : iconIds) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(true);
+                if (auto name = m_mainLayer->getChildByID("level-name")) name->setVisible(true);
                 m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name")->setVisible(true);
             }
+
             tagMenu->updateLayout();
         }
     };
 
-    void expandTags(CCObject* sender) {
-        for (const auto& id : {"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(false);
-        updateTags(true);
-    };
-
-    void collapseTags(CCObject* sender) {
-        for (const auto& id : {"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}) if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(true);
-        updateTags(false);
-    };
+    void setExpand(CCObject* sender) {
+        for (const auto& id : {"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}) {
+            if (auto icon = m_mainLayer->getChildByID(id)) icon->setVisible(m_fields->extended);
+        } updateTags(!m_fields->extended);
+    }
 };

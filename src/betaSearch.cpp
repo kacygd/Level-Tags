@@ -1,9 +1,4 @@
-#include <Geode/utils/web.hpp>
-#include <Geode/ui/LoadingSpinner.hpp>
-#include <random>
-#include "utils.hpp"
 #include "betaSearch.hpp"
-#include "tagInfo.hpp"
 
 bool BetaSearch::setup(std::string tag) {
     setTitle("beta search");
@@ -482,7 +477,7 @@ void BetaSearch::btn(CCObject* sender) {
 void BetaSearch::addTagsList(int tag, std::vector<std::string> tags) {
     CCMenu* menus[] = {menuStyle, menuTheme, menuMeta, menuGameplay};
     for (int i = 0; i < tags.size(); i++) {
-        auto spr = TagUtils::addTag(tags[i].c_str(), 0.5);
+        auto spr = TagsManager::addTag(tags[i].c_str(), 0.5);
         auto btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(BetaSearch::btn));
         btn->setID(tags[i]);
         btn->setZOrder(tagZ);

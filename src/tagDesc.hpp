@@ -3,7 +3,7 @@
 #include <Geode/Geode.hpp>
 #include <Geode/utils/web.hpp>
 #include <Geode/ui/LoadingSpinner.hpp>
-#include "utils.hpp"
+#include "tagsManager.hpp"
 
 using namespace geode::prelude;
 
@@ -12,6 +12,7 @@ private:
     EventListener<web::WebTask> m_listener;
 protected:
     bool setup(std::string tag);
+    void createDesc(std::string tag, matjson::Value descs);
 public:
     static TagDesc* create(std::string tag);
     void open(CCObject* sender);

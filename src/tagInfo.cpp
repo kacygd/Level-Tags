@@ -1,8 +1,4 @@
-#include <Geode/utils/web.hpp>
-#include <Geode/ui/LoadingSpinner.hpp>
-#include "utils.hpp"
 #include "tagInfo.hpp"
-#include "tagDesc.hpp"
 
 bool TagInfo::setup(std::string jsonStr) {
     m_closeBtn->setPosition({m_mainLayer->getContentWidth() / 2, 23});
@@ -135,7 +131,7 @@ void TagInfo::btn(CCObject* sender) {
 void TagInfo::addTagsList(int tag, std::vector<std::string> tags) {
     CCMenu* menus[] = {menuStyle, menuTheme, menuMeta, menuGameplay};
     for (int i = 0; i < tags.size(); i++) {
-        auto spr = TagUtils::addTag(tags[i].c_str(), 0.5);
+        auto spr = TagsManager::addTag(tags[i].c_str(), 0.5);
         auto btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(TagInfo::btn));
         btn->setID(tags[i]);
         btn->setZOrder(tagZ);

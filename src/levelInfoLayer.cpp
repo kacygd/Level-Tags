@@ -1,7 +1,8 @@
 #include <Geode/Geode.hpp>
 #include <Geode/utils/web.hpp>
-#include "utils.hpp"
+#include "tagsManager.hpp"
 #include "tagDesc.hpp"
+#include "moreTags.hpp"
 #include <Geode/modify/LevelInfoLayer.hpp>
 
 using namespace geode::prelude;
@@ -11,10 +12,12 @@ using namespace geode::prelude;
 class $modify(TagsLevelInfoLayer, LevelInfoLayer) {
     struct Fields {
         EventListener<web::WebTask> m_listener;
-        std::map<int, std::vector<std::string>> jsonResponse;
+        matjson::Value tags;
     };
 
     void request(CCObject* sender) {RequestTag::create({std::to_string(m_level->m_levelID.value()), m_level->isPlatformer()})->show();}
+
+    void moreTags(CCObject* sender) {MoreTags::create(m_fields->tags)->show();}
 
     $override
     bool init(GJGameLevel* level, bool challenge) {
@@ -34,28 +37,20 @@ class $modify(TagsLevelInfoLayer, LevelInfoLayer) {
 
     void loadCustomLevelInfoLayer() {
         if (!Mod::get()->getSettingValue<bool>("levelInfoShow")) return;
-        
+
+        if (TagsManager::sharedState()->cachedTags[std::to_string(m_level->m_levelID)].size() != 0) {
+            m_fields->tags = TagsManager::sortTags(TagsManager::sharedState()->cachedTags[std::to_string(m_level->m_levelID)]);
+            updateTags();
+            return;
+        }
+
         m_fields->m_listener.bind([this](web::WebTask::Event* e) {
             if (auto res = e->getValue(); res && res->ok()) {
                 auto jsonStr = res->string().unwrapOr("{}");
                 auto json = matjson::parse(jsonStr).unwrapOr("{}");
-                std::vector<std::string> result;
-                std::vector<std::string> order;
-                if (Mod::get()->getSettingValue<std::string>("tags-order") == "style, theme, meta, gameplay") {
-                    order = {"style", "theme", "meta", "gameplay"};
-                } else if (Mod::get()->getSettingValue<std::string>("tags-order") == "meta, gameplay, style, theme") {
-                    order = {"meta", "gameplay", "style", "theme"};
-                } else if (Mod::get()->getSettingValue<std::string>("tags-order") == "gameplay, meta, style, theme") {
-                    order = {"gameplay", "meta", "style", "theme"};
-                }
-                for (auto key : order) {
-                    if (json.contains(key)) {
-                        for (auto i = 0; i < json[key].size(); i++) {
-                            result.push_back(json[key][i].as<std::string>().unwrap());
-                        }
-                    }
-                }
-                m_fields->jsonResponse[m_level->m_levelID.value()] = result;
+
+                m_fields->tags = TagsManager::sortTags(json);
+                TagsManager::sharedState()->cachedTags[std::to_string(m_level->m_levelID)] = json;
                 updateTags();
             }
         });
@@ -68,7 +63,6 @@ class $modify(TagsLevelInfoLayer, LevelInfoLayer) {
         CCSize winSize = CCDirector::get()->getWinSize();
 
         auto tagMenu = CCMenu::create();
-        tagMenu->setContentWidth(winSize.width);
         tagMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(2)->setAxisAlignment(AxisAlignment::Center));
         tagMenu->setPosition({winSize.width / 2, 313});
         tagMenu->setID("level-tags");
@@ -82,13 +76,24 @@ class $modify(TagsLevelInfoLayer, LevelInfoLayer) {
         auto tagMenu = createTagContainer();
         this->addChild(tagMenu);
 
-        if (m_fields->jsonResponse.find(m_level->m_levelID.value()) != m_fields->jsonResponse.end()) {
-            auto tags = m_fields->jsonResponse[m_level->m_levelID.value()];
-            for (const auto& tag : tags) {
-                auto tagNode = CCMenuItemSpriteExtra::create(TagUtils::addTag(tag, 0.35), this, menu_selector(TagDesc::open));
-                tagNode->setID(tag);
+        if (!m_fields->tags.isNull() && m_fields->tags.isArray()) {
+            for (const auto& tag : m_fields->tags) {
+                auto tagNode = CCMenuItemSpriteExtra::create(TagsManager::addTag(tag.asString().unwrapOr(""), 0.35), this, menu_selector(TagDesc::open));
+                tagNode->setID(tag.asString().unwrapOr(""));
                 tagMenu->addChild(tagNode);
                 tagMenu->updateLayout();
+                if (tagNode->getPositionX() > 400) {
+                    auto expandSpr = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::createWithSpriteFrameName("PBtn_Arrow_001.png"), "more", "bigFont.fnt");
+                    expandSpr->setScale(0.35);
+
+                    auto tagExpand = CCMenuItemSpriteExtra::create(expandSpr, this, menu_selector(TagsLevelInfoLayer::moreTags));
+                    tagExpand->setAnchorPoint({0.5, 0.5});
+                    tagExpand->setColor({255,255,255});
+                    tagExpand->setOpacity(255);
+                    tagMenu->addChild(tagExpand);
+                    tagMenu->updateLayout();
+                    break;
+                }
             }
         }
     };

@@ -1,6 +1,9 @@
 #pragma once
 
 #include <Geode/utils/web.hpp>
+#include <Geode/ui/LoadingSpinner.hpp>
+#include "tagsManager.hpp"
+#include "tagDesc.hpp"
 
 using namespace geode::prelude;
 
