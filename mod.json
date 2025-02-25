@@ -6,8 +6,8 @@
 		"android": "2.2074"
 	},
 	"version": "v0.3.2-alpha",
-	"id": "kampwski.level_tags",
-	"name": "Level Tags",
+	"id": "cps.kampwski.level_tags",
+	"name": "CPS Level Tags",
 	"developer": "KampWski",
 	"description": "A mod that adds tags to levels.",
 	"dependencies": [
