@@ -48,7 +48,7 @@ bool TagDesc::setup(std::string tag) {
         }
     });
     auto req = web::WebRequest();
-    m_listener.setFilter(req.get("https://raw.githubusercontent.com/KampWskiR/test3/main/tagDesc.json"));
+    m_listener.setFilter(req.get("https://cps.ps.fhgdps.com/v1/tagDesc.json"));
 
     return true;
 }
