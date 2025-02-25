@@ -35,7 +35,7 @@ class $modify(TagsPauseLayer, PauseLayer) {
         });
 
         auto req = web::WebRequest();
-        m_fields->m_listener.setFilter(req.get(fmt::format("https://raw.githubusercontent.com/KampWskiR/test3/main/tags/{}.json", m_fields->levelId)));
+        m_fields->m_listener.setFilter(req.get(fmt::format("https://cps.ps.fhgdps.com/v1/tags/{}.json", m_fields->levelId)));
     }
     void updateTags() {
         CCSize winSize = CCDirector::get()->getWinSize();
